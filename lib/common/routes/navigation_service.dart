@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:gerena/common/settings/routes_names.dart';
-import 'package:gerena/features/users/presentation/login/login_controller.dart';
+import 'package:BCG_Store/common/settings/routes_names.dart';
+import 'package:BCG_Store/features/users/presentation/login/login_controller.dart';
 import 'package:get/get.dart';
 
 class NavigationService extends GetxService {

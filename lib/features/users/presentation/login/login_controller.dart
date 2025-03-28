@@ -1,19 +1,36 @@
-import 'package:gerena/common/constants/constants.dart';
-import 'package:gerena/common/routes/navigation_service.dart';
-import 'package:gerena/framework/preferences_service.dart';
-import 'package:gerena/page/widgets/custom_alert_type.dart';
+import 'package:BCG_Store/common/constants/constants.dart';
+import 'package:BCG_Store/common/routes/navigation_service.dart';
+import 'package:BCG_Store/common/services/auth_service.dart';
+import 'package:BCG_Store/framework/preferences_service.dart';
+import 'package:BCG_Store/page/widgets/custom_alert_type.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'dart:convert';
-import 'package:gerena/features/users/domain/entities/register_entitie.dart';
-import 'package:gerena/common/theme/App_Theme.dart';
-import 'package:gerena/features/users/domain/usecases/login_usecase.dart';
-import 'package:gerena/features/users/domain/usecases/register_usecase.dart';
+import 'package:BCG_Store/features/users/domain/entities/register_entitie.dart';
+import 'package:BCG_Store/features/users/domain/entities/change_password_entitie.dart';
+import 'package:BCG_Store/common/theme/App_Theme.dart';
+import 'package:BCG_Store/features/users/domain/usecases/login_usecase.dart';
+import 'package:BCG_Store/features/users/domain/usecases/register_usecase.dart';
+import 'package:BCG_Store/features/users/domain/usecases/recovery_password_usecase.dart';
+import 'package:BCG_Store/features/users/domain/usecases/change_password_usecase.dart';
+
 class LoginController extends GetxController {
   TextEditingController? emailController; 
   TextEditingController? passwordController;
   FocusNode? passwordFocusNode;
+  
+  TextEditingController? recoveryEmailController;
+  TextEditingController? tempPasswordController;
+  FocusNode? recoveryEmailFocusNode;
+  FocusNode? tempPasswordFocusNode;
+  
+  TextEditingController? currentPasswordController;
+  TextEditingController? newPasswordController; 
+  TextEditingController? confirmPasswordController;
+  FocusNode? currentPasswordFocusNode;
+  FocusNode? newPasswordFocusNode;
+  FocusNode? confirmPasswordFocusNode;
   
   TextEditingController? firstNameController;
   TextEditingController? lastNameController;
@@ -23,10 +40,22 @@ class LoginController extends GetxController {
   FocusNode? emailRegisterFocusNode;
   FocusNode? registerPasswordFocusNode;
   
+  final isPasswordVisible = false.obs;
+  final isTempPasswordVisible = false.obs;
+  final isCurrentPasswordVisible = false.obs;
+  final isNewPasswordVisible = false.obs;
+  final isConfirmPasswordVisible = false.obs;
+  final isRegisterPasswordVisible = false.obs;
+  
   final isLoginForm = false.obs;
   final isRegisterForm = false.obs;
   final isQrScannerVisible = false.obs;
   final isLoading = false.obs;
+  
+  final isRecoveryForm = false.obs;
+  final isTempPasswordForm = false.obs;
+  final isChangePasswordForm = false.obs;
+  final recoveryEmail = ''.obs;
   
   final scanOrigin = Rx<String>(''); 
 
@@ -38,10 +67,14 @@ class LoginController extends GetxController {
   
   final LoginUsecase loginUsecase;
   final RegisterUsecase registerUsecase;
+  final RecoveryPasswordUsecase recoveryPasswordUsecase;
+  final ChangePasswordUsecase changePasswordUsecase;
   
   LoginController({
     required this.loginUsecase,
     required this.registerUsecase,
+    required this.recoveryPasswordUsecase,
+    required this.changePasswordUsecase,
   });
   
   @override
@@ -101,6 +134,20 @@ class LoginController extends GetxController {
     passwordController = TextEditingController();
     passwordFocusNode = FocusNode();
     
+    // Inicializar controllers de recuperación de contraseña
+    recoveryEmailController = TextEditingController();
+    tempPasswordController = TextEditingController();
+    recoveryEmailFocusNode = FocusNode();
+    tempPasswordFocusNode = FocusNode();
+    
+    // Inicializar controllers de cambio de contraseña
+    currentPasswordController = TextEditingController();
+    newPasswordController = TextEditingController();
+    confirmPasswordController = TextEditingController();
+    currentPasswordFocusNode = FocusNode();
+    newPasswordFocusNode = FocusNode();
+    confirmPasswordFocusNode = FocusNode();
+    
     // Inicializar controllers de registro
     firstNameController = TextEditingController();
     lastNameController = TextEditingController();
@@ -118,6 +165,18 @@ class LoginController extends GetxController {
     passwordController?.dispose();
     passwordFocusNode?.dispose();
     
+    recoveryEmailController?.dispose();
+    tempPasswordController?.dispose();
+    recoveryEmailFocusNode?.dispose();
+    tempPasswordFocusNode?.dispose();
+    
+    currentPasswordController?.dispose();
+    newPasswordController?.dispose();
+    confirmPasswordController?.dispose();
+    currentPasswordFocusNode?.dispose();
+    newPasswordFocusNode?.dispose();
+    confirmPasswordFocusNode?.dispose();
+    
     firstNameController?.dispose();
     lastNameController?.dispose();
     emailRegisterController?.dispose();
@@ -129,6 +188,19 @@ class LoginController extends GetxController {
     emailController = null;
     passwordController = null;
     passwordFocusNode = null;
+    
+    recoveryEmailController = null;
+    tempPasswordController = null;
+    recoveryEmailFocusNode = null;
+    tempPasswordFocusNode = null;
+    
+    currentPasswordController = null;
+    newPasswordController = null;
+    confirmPasswordController = null;
+    currentPasswordFocusNode = null;
+    newPasswordFocusNode = null;
+    confirmPasswordFocusNode = null;
+    
     firstNameController = null;
     lastNameController = null;
     emailRegisterController = null;
@@ -142,6 +214,14 @@ class LoginController extends GetxController {
   void resetForm() {
     emailController?.clear();
     passwordController?.clear();
+    
+    recoveryEmailController?.clear();
+    tempPasswordController?.clear();
+    
+    currentPasswordController?.clear();
+    newPasswordController?.clear();
+    confirmPasswordController?.clear();
+    
     firstNameController?.clear();
     lastNameController?.clear();
     emailRegisterController?.clear();
@@ -154,12 +234,18 @@ class LoginController extends GetxController {
     isLoginForm.value = false;
     isRegisterForm.value = false;
     isQrScannerVisible.value = false;
+    isRecoveryForm.value = false;
+    isTempPasswordForm.value = false;
+    isChangePasswordForm.value = false;
   }
   
   void toggleLoginForm() {
     isLoginForm.value = !isLoginForm.value;
     isRegisterForm.value = false;
     isQrScannerVisible.value = false;
+    isRecoveryForm.value = false;
+    isTempPasswordForm.value = false;
+    isChangePasswordForm.value = false;
     scanOrigin.value = '';
   }
   
@@ -167,13 +253,46 @@ class LoginController extends GetxController {
     isQrScannerVisible.value = true;
     isRegisterForm.value = false;
     isLoginForm.value = false;
+    isRecoveryForm.value = false;
+    isTempPasswordForm.value = false;
+    isChangePasswordForm.value = false;
     scanOrigin.value = 'register';
+  }
+  
+  void toggleRecoveryForm() {
+    isRecoveryForm.value = true;
+    isLoginForm.value = false;
+    isRegisterForm.value = false;
+    isQrScannerVisible.value = false;
+    isTempPasswordForm.value = false;
+    isChangePasswordForm.value = false;
+  }
+  
+  void showTempPasswordForm() {
+    isTempPasswordForm.value = true;
+    isRecoveryForm.value = false;
+    isLoginForm.value = false;
+    isRegisterForm.value = false;
+    isQrScannerVisible.value = false;
+    isChangePasswordForm.value = false;
+  }
+  
+  void showChangePasswordForm() {
+    isChangePasswordForm.value = true;
+    isTempPasswordForm.value = false;
+    isRecoveryForm.value = false;
+    isLoginForm.value = false;
+    isRegisterForm.value = false;
+    isQrScannerVisible.value = false;
   }
 
   void showQRScannerForLogin() {
     isQrScannerVisible.value = true;
     isRegisterForm.value = false;
     isLoginForm.value = false;
+    isRecoveryForm.value = false;
+    isTempPasswordForm.value = false;
+    isChangePasswordForm.value = false;
     scanOrigin.value = 'login';
   }
 
@@ -181,6 +300,9 @@ class LoginController extends GetxController {
     isQrScannerVisible.value = false;
     isRegisterForm.value = true;
     isLoginForm.value = false;
+    isRecoveryForm.value = false;
+    isTempPasswordForm.value = false;
+    isChangePasswordForm.value = false;
   }
 
   void onQRCodeDetected(String qrData) {
@@ -207,10 +329,11 @@ class LoginController extends GetxController {
           isLoginForm.value = true;
           isRegisterForm.value = false;
           
-          _showSuccessAlert(
-            'Base de datos configurada',
-            'La base de datos ha sido configurada correctamente. Ahora puedes iniciar sesión.'
-          );
+        _showSuccessAlert(
+  'Escaneo de QR para iniciar sesión',
+  'El QR ha sido configurado correctamente. Ahora puedes escanearlo para iniciar sesión.'
+);
+
         } else {
           showRegisterFormAfterQR();
         }
@@ -236,7 +359,7 @@ class LoginController extends GetxController {
     }
   }
 
-  void _showSuccessAlert(String title, String message) {
+  void _showSuccessAlert(String title, String message, {VoidCallback? onConfirm}) {
     if (Get.context != null) {
       showCustomAlert(
         context: Get.context!,
@@ -244,6 +367,7 @@ class LoginController extends GetxController {
         message: message,
         confirmText: 'Aceptar',
         type: CustomAlertType.success,
+        onConfirm: onConfirm,
       );
     }
   }
@@ -265,6 +389,9 @@ class LoginController extends GetxController {
     isQrScannerVisible.value = false;
     isRegisterForm.value = false;
     isLoginForm.value = false;
+    isRecoveryForm.value = false;
+    isTempPasswordForm.value = false;
+    isChangePasswordForm.value = false;
   }
   
   Future<void> login() async {
@@ -286,33 +413,39 @@ class LoginController extends GetxController {
         if (baseDatos == null || baseDatos.isEmpty) {
           isLoading.value = false;
           
-          _showErrorAlert(
-            'Base de datos no encontrada', 
-            'No se encontró la base de datos. Por favor escanea un código QR válido.',
-            onDismiss: () {
-              Get.back(); 
-              Future.delayed(Duration(milliseconds: 300), () {
-                showQRScannerForLogin();
-              });
-            }
-          );
+         _showErrorAlert(
+  'Código QR no encontrado',
+  'No se encontró un código QR válido. Por favor, escanea un código QR.',
+  onDismiss: () {
+    Get.back(); 
+    Future.delayed(Duration(milliseconds: 300), () {
+      showQRScannerForLogin();
+    });
+  }
+);
+
           return;
         }
         
-        final result = await loginUsecase.execute(
+        final loginResponse = await loginUsecase.execute(
           emailController!.text,
           passwordController!.text,
           baseDatos
         );
-        
-        print('Login exitoso: $result');
+        final authService = AuthService();
+      final bool saved = await authService.saveLoginResponse(loginResponse);
+        print('Login exitoso: $loginResponse');
         
         emailController?.clear();
         passwordController?.clear();
         isLoading.value = false;
         
-        Get.offAllNamed('/homePage');
-        resetForm();
+        if (isTempPasswordForm.value) {
+          showChangePasswordForm();
+        } else {
+          Get.offAllNamed('/homePage');
+          resetForm();
+        }
       } catch (e) {
         String cleanErrorMessage = e.toString();
         if (cleanErrorMessage.startsWith("Exception: Exception:")) {
@@ -326,6 +459,166 @@ class LoginController extends GetxController {
       }
     } else {
       _showWarningAlert('Campos incompletos', 'Por favor completa todos los campos para iniciar sesión.');
+    }
+  }
+  
+  Future<void> recoverPassword() async {
+    if (recoveryEmailController?.text.isEmpty == true) {
+      _showWarningAlert('Campo incompleto', 'Por favor ingresa tu correo electrónico para recuperar tu contraseña.');
+      return;
+    }
+    
+    try {
+      isLoading.value = true;
+      
+      await recoveryPasswordUsecase.execute(recoveryEmailController!.text);
+      
+      recoveryEmail.value = recoveryEmailController!.text;
+      
+      _showSuccessAlert(
+        'Contraseña restablecida con éxito',
+        'Por favor, verifica tu correo electrónico para obtener la contraseña temporal.',
+        onConfirm: () {
+          Get.back();
+          showTempPasswordForm();
+        }
+      );
+      
+    } catch (e) {
+      String errorMessage = e.toString();
+      if (errorMessage.startsWith("Exception: Exception:")) {
+        errorMessage = errorMessage.replaceFirst("Exception: Exception:", "").trim();
+      } else if (errorMessage.startsWith("Exception:")) {
+        errorMessage = errorMessage.replaceFirst("Exception:", "").trim();
+      }
+      print('Error en recuperación: $e');
+      _showErrorAlert('Error en recuperación', errorMessage);
+    } finally {
+      isLoading.value = false;
+    }
+  }
+  
+  Future<void> loginWithTempPassword() async {
+    if (tempPasswordController?.text.isEmpty == true) {
+      _showWarningAlert('Campo incompleto', 'Por favor ingresa la contraseña temporal que recibiste por correo.');
+      return;
+    }
+    
+    try {
+      isLoading.value = true;
+      
+      String? baseDatos;
+      if (qrClientData.value.containsKey('base_datos')) {
+        baseDatos = qrClientData.value['base_datos'].toString();
+      } else {
+        baseDatos = await _prefsUser.loadPrefs(
+          type: String, 
+          key: AppConstants.baseDatosKey
+        );
+      }
+      
+      if (baseDatos == null || baseDatos.isEmpty) {
+        isLoading.value = false;
+        
+          _showErrorAlert(
+      'QR no válido',
+      'No se encontró un QR válido. Por favor escanea un código QR correcto.',
+      onDismiss: () {
+        Get.back(); 
+        Future.delayed(Duration(milliseconds: 300), () {
+          showQRScannerForLogin();
+        });
+      }
+    );
+
+        return;
+      }
+      
+      final result = await loginUsecase.execute(
+        recoveryEmail.value,
+        tempPasswordController!.text,
+        baseDatos
+      );
+      
+      print('Login con contraseña temporal exitoso: $result');
+      
+      currentPasswordController?.text = tempPasswordController!.text;
+      
+      tempPasswordController?.clear();
+      isLoading.value = false;
+      
+      showChangePasswordForm();
+      
+    } catch (e) {
+      String cleanErrorMessage = e.toString();
+      if (cleanErrorMessage.startsWith("Exception: Exception:")) {
+        cleanErrorMessage = cleanErrorMessage.replaceFirst("Exception: Exception:", "").trim();
+      } else if (cleanErrorMessage.startsWith("Exception:")) {
+        cleanErrorMessage = cleanErrorMessage.replaceFirst("Exception:", "").trim();
+      }
+      print('Error en login con contraseña temporal: $e');
+      _showErrorAlert('ACCESO INCORRECTO', cleanErrorMessage);
+      isLoading.value = false;
+    }
+  }
+  
+  Future<void> changePassword() async {
+    if (newPasswordController?.text.isEmpty == true ||
+        confirmPasswordController?.text.isEmpty == true) {
+      _showWarningAlert('Campos incompletos', 'Por favor completa todos los campos.');
+      return;
+    }
+    
+    if (newPasswordController!.text != confirmPasswordController!.text) {
+      _showErrorAlert('Error de validación', 'Las contraseñas nuevas no coinciden.');
+      return;
+    }
+    
+    try {
+      isLoading.value = true;
+      
+      int? idCliente;
+      if (qrClientData.value.containsKey('id_cliente')) {
+        idCliente = int.tryParse(qrClientData.value['id_cliente'].toString());
+      }
+      
+      if (currentPasswordController?.text.isEmpty == true) {
+        print('No hay contraseña actual, usando la contraseña temporal');
+        currentPasswordController?.text = tempPasswordController?.text ?? '';
+      }
+      
+      print('Enviando datos para cambio de contraseña: {"id_cliente":$idCliente,"current_password":"${currentPasswordController?.text}","new_password":"${newPasswordController?.text}","confirm_password":"${confirmPasswordController?.text}"}');
+      
+      final changePasswordEntity = ChangePasswordEntitie(
+        id_cliente: idCliente,
+        current_password: currentPasswordController?.text ?? '',
+        new_password: newPasswordController!.text,
+        confirm_password: confirmPasswordController!.text,
+      );
+      
+      await changePasswordUsecase.execute(changePasswordEntity);
+      
+      _showSuccessAlert(
+        'Contraseña actualizada',
+        'Tu contraseña ha sido actualizada exitosamente.',
+        onConfirm: () {
+          Get.back();
+          Get.offAllNamed('/homePage');
+          resetForm();
+        }
+      );
+      
+    } catch (e) {
+      String errorMessage = e.toString();
+      if (errorMessage.startsWith("Exception: Exception:")) {
+        errorMessage = errorMessage.replaceFirst("Exception: Exception:", "").trim();
+      } else if (errorMessage.startsWith("Exception:")) {
+        errorMessage = errorMessage.replaceFirst("Exception:", "").trim();
+      }
+      print('Error al cambiar contraseña: $e');
+      _showErrorAlert('Error', errorMessage);
+    } finally {
+      isLoading.value = false;
     }
   }
 

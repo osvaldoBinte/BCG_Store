@@ -1,10 +1,10 @@
+import 'package:BCG_Store/common/routes/navigation_service.dart';
+import 'package:BCG_Store/common/services/auth_service.dart';
+import 'package:BCG_Store/common/theme/App_Theme.dart';
+import 'package:BCG_Store/features/clients/presentation/profile/profile_controller.dart';
+import 'package:BCG_Store/page/payment/add_payment_method.dart';
+import 'package:BCG_Store/page/viewPayment/view_payment_methods.dart';
 import 'package:flutter/material.dart';
-import 'package:gerena/common/routes/navigation_service.dart';
-import 'package:gerena/common/services/auth_service.dart';
-import 'package:gerena/common/theme/App_Theme.dart';
-import 'package:gerena/features/clients/presentation/profile/profile_controller.dart';
-import 'package:gerena/page/payment/add_payment_method.dart';
-import 'package:gerena/page/viewPayment/view_payment_methods.dart';
 import 'package:get/get.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -357,19 +357,15 @@ final RxInt _currentPage = 0.obs;
     final padding = MediaQuery.of(context).padding;
     final ProfileController controller = Get.find<ProfileController>();
     
-    // Determinar la altura de la barra de navegación inferior
-    final bottomNavHeight = 70.0 + 16.0 * 2; // NavBar height + margins
-
+    final bottomNavHeight = 70.0 + 16.0 * 2;
     return Scaffold(
       body: LayoutBuilder(
         builder: (context, constraints) {
-          // Calcular el espacio disponible real
           final availableHeight = constraints.maxHeight;
           
           return SingleChildScrollView(
             padding: EdgeInsets.only(bottom: bottomNavHeight),
             child: ConstrainedBox(
-              // Restricción para asegurar que el contenido ocupe al menos toda la pantalla visible
               constraints: BoxConstraints(
                 minHeight: availableHeight,
               ),
@@ -451,7 +447,6 @@ final RxInt _currentPage = 0.obs;
                         ),
                         const SizedBox(height: 24),
                         
-                        // Título para el carrusel
                         Padding(
                           padding: const EdgeInsets.only(left: 16, bottom: 12),
                           child: Text(
@@ -462,10 +457,8 @@ final RxInt _currentPage = 0.obs;
                           ),
                         ),
                         
-                        // Carrusel horizontal de tarjetas - Condicional según estado de tienda
                         _buildCardsCarousel(context),
                         
-                        // Indicadores de página para el carrusel - Adaptado al número de tarjetas
                         Obx(() {
                             int totalPages = _isTiendaActiva.value ? 3 : 1;
                             return Padding(
@@ -478,7 +471,6 @@ final RxInt _currentPage = 0.obs;
                       
                         const SizedBox(height: 24),
                       
-                        // Espacio adicional al final para asegurar que la NavBar no tape el contenido
                         const SizedBox(height: 8),
                       ],
                     ),

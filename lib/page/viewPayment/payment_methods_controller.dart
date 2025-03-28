@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:gerena/page/widgets/custom_alert_type.dart';
+import 'package:BCG_Store/page/widgets/custom_alert_type.dart';
 import 'package:get/get.dart';
-import 'package:gerena/common/theme/App_Theme.dart';
+import 'package:BCG_Store/common/theme/App_Theme.dart';
 
 class PaymentMethodsController extends GetxController {
   final paymentMethods = <Map<String, dynamic>>[

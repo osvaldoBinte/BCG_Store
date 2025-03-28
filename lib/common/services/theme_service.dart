@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:gerena/common/constants/constants.dart';
-import 'package:gerena/framework/preferences_service.dart';
+import 'package:BCG_Store/common/constants/constants.dart';
+import 'package:BCG_Store/framework/preferences_service.dart';
 import 'package:get/get.dart';
 class ThemeService extends GetxService {
   static ThemeService get to => Get.find<ThemeService>();

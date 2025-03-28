@@ -1,23 +1,130 @@
+import 'package:BCG_Store/common/constants/constants.dart';
+import 'package:BCG_Store/common/routes/navigation_service.dart';
+import 'package:BCG_Store/common/theme/App_Theme.dart';
+import 'package:BCG_Store/features/rewards/domain/entities/get_data_sells_entitie.dart';
+import 'package:BCG_Store/features/rewards/presentation/getDataSells/get_data_sells_controller.dart';
+import 'package:BCG_Store/features/rewards/presentation/getDataSells/get_data_sells_loading.dart';
+import 'package:BCG_Store/framework/preferences_service.dart';
 import 'package:flutter/material.dart';
-import 'package:gerena/features/rewards/domain/usecases/get_data_sells_usecase.dart';
-import 'package:gerena/features/rewards/presentation/getDataSells/get_data_sells_loading.dart';
-import 'package:gerena/features/rewards/presentation/getDataSells/get_data_sells_controller.dart';
 import 'package:get/get.dart';
-import 'package:gerena/common/routes/navigation_service.dart';
-import 'package:gerena/common/theme/App_Theme.dart';
 import 'package:intl/intl.dart';
-
-class GetDataSellsPage extends StatelessWidget {
+import 'dart:convert';
+class GetDataSellsPage extends StatefulWidget {
   const GetDataSellsPage({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    final PurchasesController controller = Get.find<PurchasesController>();
+  State<GetDataSellsPage> createState() => _GetDataSellsPageState();
+}
+
+class _GetDataSellsPageState extends State<GetDataSellsPage> with TickerProviderStateMixin {
+  late GetDataSellsController controller;
+  TabController? tabController;
+  final RxInt selectedTab = 0.obs;
+  final RxBool isTiendaActiva = false.obs;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = Get.find<GetDataSellsController>();
+    
+    _checkTiendaActiva();
     
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      controller.initialize();
+      controller.fetchDataSells();
     });
+  }
 
+  Future<void> _checkTiendaActiva() async {
+    try {
+      final PreferencesUser prefsUser = PreferencesUser();
+      final sessionJson = await prefsUser.loadPrefs(
+        type: String,
+        key: AppConstants.sessionKey
+      );
+      
+      if (sessionJson != null && sessionJson.isNotEmpty) {
+        final Map<String, dynamic> sessionMap = jsonDecode(sessionJson);
+        isTiendaActiva.value = sessionMap['tienda_activa'] == "1";
+        
+        _initializeTabController();
+      } else {
+        isTiendaActiva.value = false;
+        _initializeTabController();
+      }
+    } catch (e) {
+      print('❌ Error al verificar tienda_activa: $e');
+      isTiendaActiva.value = false;
+      _initializeTabController();
+    }
+  }
+
+  void _initializeTabController() {
+    // Si tienda_activa es true, mostrar dos pestañas, si no, solo una (Tienda)
+    int numberOfTabs = isTiendaActiva.value ? 2 : 1;
+    
+    // Disponer el controlador anterior si existe
+    tabController?.dispose();
+    
+    // Crear un nuevo controlador con el número correcto de pestañas
+    tabController = TabController(length: numberOfTabs, vsync: this);
+    tabController!.addListener(() {
+      selectedTab.value = tabController!.index;
+    });
+  }
+
+  @override
+  void dispose() {
+    tabController?.dispose();
+    super.dispose();
+  }
+
+  // Método para recargar los datos
+  void forceReload() {
+    controller.fetchDataSells();
+  }
+
+  String getPurchaseDate(String folio) {
+    final purchase = controller.buscarVentaPorFolio(folio);
+    return purchase?.fecha ?? 'Fecha no disponible';
+  }
+
+  double getPurchaseTotal(String folio) {
+    final purchase = controller.buscarVentaPorFolio(folio);
+    return purchase?.total ?? 0.0;
+  }
+
+  double getPurchaseSubtotal(String folio) {
+    final purchase = controller.buscarVentaPorFolio(folio);
+    return purchase?.subtotal ?? 0.0;
+  }
+
+  double getPurchaseIVA(String folio) {
+    final purchase = controller.buscarVentaPorFolio(folio);
+    return purchase?.iva ?? 0.0;
+  }
+
+  String getPurchasePaymentMethod(String folio) {
+    final purchase = controller.buscarVentaPorFolio(folio);
+    return purchase?.formaPago ?? 'No disponible';
+  }
+
+  Map<String, List<GetDataSellsEntitie>> get purchasesByFolio {
+    Map<String, List<GetDataSellsEntitie>> result = {};
+    
+    for (var item in controller.sellsList) {
+      if (item.folio != null) {
+        if (!result.containsKey(item.folio)) {
+          result[item.folio!] = [];
+        }
+        result[item.folio!]!.add(item);
+      }
+    }
+    
+    return result;
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppTheme.theme.scaffoldBackgroundColor,
       appBar: AppBar(
@@ -32,20 +139,7 @@ class GetDataSellsPage extends StatelessWidget {
         bottom: PreferredSize(
           preferredSize: Size.fromHeight(48.0),
           child: Obx(() {
-            if (controller.isLoadingStore.value) {
-              return Container(
-                height: 48,
-                child: Center(
-                  child: LinearProgressIndicator(
-                    color: AppTheme.primaryColor,
-                    backgroundColor: AppTheme.primaryColor.withOpacity(0.3),
-                  ),
-                ),
-              );
-            }
-            
-            // Si el tabController aún no existe, mostramos un indicador de carga
-            if (controller.tabController == null) {
+            if (controller.isLoading.value || tabController == null) {
               return Container(
                 height: 48,
                 child: Center(
@@ -58,15 +152,15 @@ class GetDataSellsPage extends StatelessWidget {
             }
             
             // Si solo hay una pestaña (Tienda)
-            if (!controller.isTiendaActiva.value && controller.tabController!.length == 1) {
+            if (!isTiendaActiva.value && tabController!.length == 1) {
               return TabBar(
-                controller: controller.tabController!,
+                controller: tabController!,
                 indicatorWeight: 3,
                 tabs: [
                   Tab(
                     child: Container(
                       decoration: BoxDecoration(
-                        color: controller.selectedTab.value == 0
+                        color: selectedTab.value == 0
                             ? AppTheme.backgroundGreyDark
                             : AppTheme.primaryColor,
                         borderRadius: BorderRadius.circular(4),
@@ -74,7 +168,7 @@ class GetDataSellsPage extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                       child: Text(
                         'TIENDA',
-                        style: controller.selectedTab.value == 0
+                        style: selectedTab.value == 0
                             ? AppTheme.theme.textTheme.bodyMedium?.copyWith(
                                 color: AppTheme.textSecondaryColor,
                               )
@@ -84,17 +178,17 @@ class GetDataSellsPage extends StatelessWidget {
                   ),
                 ],
               );
-            } else if (controller.tabController!.length == 2) {
+            } else if (isTiendaActiva.value && tabController!.length == 2) {
               // Dos pestañas (Online y Tienda)
               return TabBar(
-                controller: controller.tabController!,
+                controller: tabController!,
                 indicatorWeight: 3,
                 tabs: [
                   // Pestaña Online
                   Tab(
                     child: Container(
                       decoration: BoxDecoration(
-                        color: controller.selectedTab.value == 0
+                        color: selectedTab.value == 0
                             ? AppTheme.backgroundGreyDark
                             : AppTheme.primaryColor,
                         borderRadius: BorderRadius.circular(4),
@@ -102,7 +196,7 @@ class GetDataSellsPage extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                       child: Text(
                         'ONLINE',
-                        style: controller.selectedTab.value == 0
+                        style: selectedTab.value == 0
                             ? AppTheme.theme.textTheme.bodyMedium?.copyWith(
                                 color: AppTheme.textSecondaryColor,
                               )
@@ -115,7 +209,7 @@ class GetDataSellsPage extends StatelessWidget {
                   Tab(
                     child: Container(
                       decoration: BoxDecoration(
-                        color: controller.selectedTab.value == 1
+                        color: selectedTab.value == 1
                             ? AppTheme.backgroundGreyDark
                             : AppTheme.primaryColor,
                         borderRadius: BorderRadius.circular(4),
@@ -123,7 +217,7 @@ class GetDataSellsPage extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                       child: Text(
                         'TIENDA',
-                        style: controller.selectedTab.value == 1
+                        style: selectedTab.value == 1
                             ? AppTheme.theme.textTheme.bodyMedium?.copyWith(
                                 color: AppTheme.textSecondaryColor,
                               )
@@ -134,7 +228,7 @@ class GetDataSellsPage extends StatelessWidget {
                 ],
               );
             } else {
-              // Estado de carga inicial
+              // Estado de carga inicial o inconsistencia
               return Center(
                 child: Container(
                   height: 48,
@@ -149,47 +243,14 @@ class GetDataSellsPage extends StatelessWidget {
         ),
       ),
       body: Obx(() {
-        if (controller.isLoadingStore.value) {
+        if (controller.isLoading.value || tabController == null) {
           return Center(
-            child: GetDataSellsLoading(
-            ),
+            child: GetDataSellsLoading(),
           );
         }
         
-        if (controller.tabController == null) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                CircularProgressIndicator(
-                  color: AppTheme.primaryColor,
-                ),
-                SizedBox(height: 16),
-                Text(
-                  'Inicializando...',
-                  style: TextStyle(
-                    color: AppTheme.textPrimaryColor,
-                    fontSize: 16,
-                  ),
-                ),
-                SizedBox(height: 24),
-                ElevatedButton(
-                  onPressed: () {
-                    controller.initialize();
-                  },
-                  child: Text('Reintentar'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.primaryColor,
-                    foregroundColor: AppTheme.secondaryColor,
-                  ),
-                ),
-              ],
-            ),
-          );
-        }
-        
-        // Si hay un error al cargar
-        if (controller.hasErrorStore.value) {
+        // Solo mostrar error si hay un mensaje de error y NO es una respuesta vacía
+        if (controller.errorMessage.value.isNotEmpty && !controller.emptyResponse.value) {
           return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -208,14 +269,14 @@ class GetDataSellsPage extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 24.0),
                   child: Text(
-                    controller.errorMessageStore.value,
+                    controller.errorMessage.value,
                     style: Theme.of(context).textTheme.bodyMedium,
                     textAlign: TextAlign.center,
                   ),
                 ),
                 const SizedBox(height: 24),
                 ElevatedButton.icon(
-                  onPressed: () => controller.retryFetchStoreItems(),
+                  onPressed: () => controller.fetchDataSells(),
                   icon: Icon(Icons.refresh),
                   label: Text('Reintentar'),
                   style: ElevatedButton.styleFrom(
@@ -229,22 +290,30 @@ class GetDataSellsPage extends StatelessWidget {
           );
         }
         
-        return TabBarView(
-          controller: controller.tabController!,
-          children: [
-            if (controller.isTiendaActiva.value)
-              _buildEmptyStateOnline(context), 
-            
-            _buildPurchasesListFromAPI(context, controller),
-          ],
-        );
+        // Construir el TabBarView con el número correcto de pestañas
+        if (isTiendaActiva.value && tabController!.length == 2) {
+          return TabBarView(
+            controller: tabController!,
+            children: [
+              _buildEmptyStateOnline(context),
+              _buildPurchasesListFromAPI(context),
+            ],
+          );
+        } else {
+          // Si solo hay una pestaña (Tienda)
+          return TabBarView(
+            controller: tabController!,
+            children: [
+              _buildPurchasesListFromAPI(context),
+            ],
+          );
+        }
       }),
-      floatingActionButton: Obx(() => controller.isLoadingStore.value
+      floatingActionButton: Obx(() => controller.isLoading.value
         ? SizedBox() 
         : FloatingActionButton(
             onPressed: () {
-              controller.forceReload();
-             
+              forceReload();
             },
             backgroundColor: AppTheme.primaryColor,
             child: Icon(Icons.refresh, color: AppTheme.backgroundColor),
@@ -339,42 +408,42 @@ class GetDataSellsPage extends StatelessWidget {
   }
 
   // Nuevo método para mostrar las compras desde la API
-  Widget _buildPurchasesListFromAPI(BuildContext context, PurchasesController controller) {
-    if (controller.purchasesByFolio.isEmpty) {
-      // Si estamos en la pestaña de tienda física, mostramos el estado vacío sin botón
-      if (!controller.isTiendaActiva.value || controller.selectedTab.value == 1) {
+  Widget _buildPurchasesListFromAPI(BuildContext context) {
+    if (purchasesByFolio.isEmpty) {
+      // Si estamos en la pestaña de tienda física o solo hay una pestaña
+      if (!isTiendaActiva.value || selectedTab.value == 1 || tabController!.length == 1) {
         return _buildEmptyStateTienda(context);
       } else {
-        // Si estamos en la pestaña online, mostramos el estado vacío con botón
+        // Si estamos en la pestaña online
         return _buildEmptyStateOnline(context);
       }
     }
 
-    final folios = controller.purchasesByFolio.keys.toList();
+    final folios = purchasesByFolio.keys.toList();
     folios.sort((a, b) => b.compareTo(a)); // Ordenar por folio descendente (más reciente primero)
 
     return RefreshIndicator(
-      onRefresh: () => controller.forceReload(),
+      onRefresh: () async => forceReload(),
       color: AppTheme.primaryColor,
       child: ListView.builder(
         padding: const EdgeInsets.all(16),
         itemCount: folios.length,
         itemBuilder: (context, index) {
           final folio = folios[index];
-          final items = controller.purchasesByFolio[folio] ?? [];
-          return _buildPurchaseCardFromAPI(context, controller, folio, items);
+          final items = purchasesByFolio[folio] ?? [];
+          return _buildPurchaseCardFromAPI(context, folio, items);
         },
       ),
     );
   }
 
-  Widget _buildPurchaseCardFromAPI(BuildContext context, PurchasesController controller, String folio, List items) {
+  Widget _buildPurchaseCardFromAPI(BuildContext context, String folio, List<GetDataSellsEntitie> items) {
     final theme = Theme.of(context);
-    final fecha = controller.getPurchaseDate(folio);
-    final total = controller.getPurchaseTotal(folio);
-    final subtotal = controller.getPurchaseSubtotal(folio);
-    final iva = controller.getPurchaseIVA(folio);
-    final formaPago = controller.getPurchasePaymentMethod(folio);
+    final fecha = getPurchaseDate(folio);
+    final total = getPurchaseTotal(folio);
+    final subtotal = getPurchaseSubtotal(folio);
+    final iva = getPurchaseIVA(folio);
+    final formaPago = getPurchasePaymentMethod(folio);
     
     // Formato de fecha
     String formattedDate = '';
@@ -517,7 +586,7 @@ class GetDataSellsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildProductItemFromAPI(BuildContext context, dynamic item) {
+  Widget _buildProductItemFromAPI(BuildContext context, GetDataSellsEntitie item) {
     final theme = Theme.of(context);
     
     return Padding(

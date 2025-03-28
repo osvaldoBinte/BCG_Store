@@ -1,7 +1,7 @@
 import 'dart:convert';
-import 'package:gerena/common/constants/constants.dart';
-import 'package:gerena/features/users/data/models/login_response.dart';
-import 'package:gerena/framework/preferences_service.dart';
+import 'package:BCG_Store/common/constants/constants.dart';
+import 'package:BCG_Store/features/users/data/models/login_response.dart';
+import 'package:BCG_Store/framework/preferences_service.dart';
 class AuthService {
   static final AuthService _instance = AuthService._internal();
   final PreferencesUser _prefsUser = PreferencesUser();

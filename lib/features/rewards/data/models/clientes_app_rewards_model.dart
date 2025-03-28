@@ -1,4 +1,5 @@
-import 'package:gerena/features/rewards/domain/entities/clientes_app_rewards_entitie.dart';
+
+import 'package:BCG_Store/features/rewards/domain/entities/clientes_app_rewards_entitie.dart';
 
 class ClientesAppRewardsModel  extends ClientesAppRewardsEntitie{
   ClientesAppRewardsModel({

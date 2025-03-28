@@ -1,4 +1,5 @@
-import 'package:gerena/features/users/domain/entities/change_password_entitie.dart';
+
+import 'package:BCG_Store/features/users/domain/entities/change_password_entitie.dart';
 
 class ChangePasseordModel extends ChangePasswordEntitie {
   ChangePasseordModel({

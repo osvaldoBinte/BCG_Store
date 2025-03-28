@@ -1,5 +1,5 @@
-import 'package:gerena/features/users/domain/entities/change_password_entitie.dart';
-import 'package:gerena/features/users/domain/repositories/user_repository.dart';
+import 'package:BCG_Store/features/users/domain/entities/change_password_entitie.dart';
+import 'package:BCG_Store/features/users/domain/repositories/user_repository.dart';
 
 class ChangePasswordUsecase {
   final UserRepository userRepository;

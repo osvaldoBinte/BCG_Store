@@ -1,5 +1,5 @@
-import 'package:gerena/features/users/data/models/login_response.dart';
-import 'package:gerena/features/users/domain/repositories/user_repository.dart';
+import 'package:BCG_Store/features/users/data/models/login_response.dart';
+import 'package:BCG_Store/features/users/domain/repositories/user_repository.dart';
 
 
 class LoginUsecase {

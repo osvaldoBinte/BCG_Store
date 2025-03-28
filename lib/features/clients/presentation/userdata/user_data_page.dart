@@ -1,10 +1,9 @@
+import 'package:BCG_Store/common/routes/navigation_service.dart';
+import 'package:BCG_Store/common/services/auth_service.dart';
+import 'package:BCG_Store/common/theme/App_Theme.dart';
+import 'package:BCG_Store/features/clients/presentation/userdata/user_data_Loading.dart';
+import 'package:BCG_Store/features/clients/presentation/userdata/user_data_controller.dart';
 import 'package:flutter/material.dart';
-import 'package:gerena/common/routes/navigation_service.dart';
-import 'package:gerena/common/services/auth_service.dart';
-import 'package:gerena/common/theme/App_Theme.dart';
-import 'package:gerena/features/clients/presentation/userdata/user_data_Loading.dart';
-import 'package:gerena/features/clients/presentation/userdata/user_data_controller.dart';
-import 'package:gerena/features/rewards/presentation/points/custom_loading_screen.dart';
 import 'package:get/get.dart';
 
 class UserDataPage extends StatelessWidget {

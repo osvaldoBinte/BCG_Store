@@ -1,25 +1,25 @@
 import 'dart:convert';
 
-import 'package:gerena/common/constants/constants.dart';
-import 'package:gerena/common/services/auth_service.dart';
-import 'package:gerena/features/users/data/models/change_passeord_model.dart';
-import 'package:gerena/features/users/data/models/login_response.dart';
-import 'package:gerena/features/users/data/models/register_model.dart';
-import 'package:gerena/features/users/domain/entities/change_password_entitie.dart';
-import 'package:gerena/features/users/domain/entities/register_entitie.dart';
+import 'package:BCG_Store/common/constants/constants.dart';
+import 'package:BCG_Store/features/users/data/models/change_passeord_model.dart';
+import 'package:BCG_Store/features/users/data/models/login_response.dart';
+import 'package:BCG_Store/features/users/data/models/register_model.dart';
+import 'package:BCG_Store/features/users/domain/entities/change_password_entitie.dart';
+import 'package:BCG_Store/features/users/domain/entities/register_entitie.dart';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
 
 abstract class UserLocalDataSources {
   Future<void> registerUser(RegisterEntitie registerEntitie);
   Future<LoginResponse> loginUser(String username, String password, [String? base_datos]);
   Future<void> changePassword(ChangePasswordEntitie change_password_entiti, String token);
+  Future<void> recoveryPassword(String email);
 
   
 }
 
 class UserLocalDataSourcesImp implements UserLocalDataSources {
   String defaultApiServer = AppConstants.serverBase;
+
 @override
 Future<void> changePassword(ChangePasswordEntitie change_password_entitie, String token) async {
   try {
@@ -110,12 +110,7 @@ Future<LoginResponse> loginUser(String username, String password, [String? base_
       final Map<String, dynamic> responseData = jsonDecode(response.body);
       final loginResponse = LoginResponse.fromJson(responseData);
       
-      final authService = AuthService();
-      final bool saved = await authService.saveLoginResponse(loginResponse);
       
-      if (!saved) {
-        throw Exception('Error al guardar los datos de la sesión');
-      }
       
       print('Login exitoso: ${loginResponse.message}');
       return loginResponse;
@@ -140,7 +135,6 @@ Future<LoginResponse> loginUser(String username, String password, [String? base_
   }
 }
 
-  final String apiBaseUrl = AppConstants.serverBase;
 
  
 
@@ -193,6 +187,45 @@ Future<LoginResponse> loginUser(String username, String password, [String? base_
       throw Exception('Error en el registro: $e');
     }
   }
+  
+ @override
+Future<void> recoveryPassword(String email) async {
+  try {
+    final response = await http.post(
+      Uri.parse('$defaultApiServer/users/recover-password/'), 
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        'email': email,
+      }),
+    );
+
+    print('recovery password Response status: ${response.statusCode}');
+    print('recovery password Response body: ${response.body}');
+
+    if (response.statusCode == 200) {
+      print('Solicitud de recuperación enviada exitosamente');
+    } else {
+      if (response.statusCode == 404) {
+        throw Exception('El correo electrónico no está registrado');
+      } else if (response.statusCode == 400) {
+        try {
+          final Map<String, dynamic> errorData = jsonDecode(response.body);
+          final String errorMessage = errorData['detail'] ?? errorData['message'] ?? 'Datos de solicitud incorrectos';
+          throw Exception(errorMessage);
+        } catch (e) {
+          throw Exception('Datos de solicitud incorrectos');
+        }
+      } else {
+        throw Exception('Error en la recuperación de contraseña: ${response.statusCode}');
+      }
+    }
+  } catch (e) {
+    print('Error detallado: $e');
+    throw Exception('$e');
+  }
+}
   
    
 }

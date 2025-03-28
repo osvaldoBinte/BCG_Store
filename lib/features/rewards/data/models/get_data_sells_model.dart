@@ -1,4 +1,5 @@
-import 'package:gerena/features/rewards/domain/entities/get_data_sells_entitie.dart';
+
+import 'package:BCG_Store/features/rewards/domain/entities/get_data_sells_entitie.dart';
 
 class GetDataSellsModel extends GetDataSellsEntitie {
   GetDataSellsModel({

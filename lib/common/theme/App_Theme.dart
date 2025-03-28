@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gerena/common/services/theme_service.dart';
+import 'package:BCG_Store/common/services/theme_service.dart';
 
 class AppTheme {
   // Propiedades de color que ahora acceden al servicio

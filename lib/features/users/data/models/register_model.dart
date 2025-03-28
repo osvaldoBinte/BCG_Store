@@ -1,4 +1,5 @@
-import 'package:gerena/features/users/domain/entities/register_entitie.dart';
+
+import 'package:BCG_Store/features/users/domain/entities/register_entitie.dart';
 
 class RegisterModel extends RegisterEntitie {
   RegisterModel({

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:gerena/features/users/presentation/changepassword/change_password_controller.dart';
+import 'package:BCG_Store/common/widgets/rounded_logo_widget.dart';
+import 'package:BCG_Store/features/users/presentation/changepassword/change_password_controller.dart';
 import 'package:get/get.dart';
-import 'package:gerena/common/theme/App_Theme.dart';
+import 'package:BCG_Store/common/theme/App_Theme.dart';
 
 class ChangePasswordPage extends GetView<ChangePasswordController> {
   const ChangePasswordPage({Key? key}) : super(key: key);
@@ -27,18 +28,15 @@ class ChangePasswordPage extends GetView<ChangePasswordController> {
                 if (AppTheme.hasCustomLogo)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 24.0),
-                    child: Center(
-                      child: Image.network(
-                        AppTheme.logoUrl,
-                        height: 80,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Image.network(
-                            AppTheme.defaultLogoAsset,
-                            height: 80,
-                          );
-                        },
-                      ),
-                    ),
+                    child: Padding(
+  padding: const EdgeInsets.only(bottom: 24.0),
+  child: Center(
+    child: RoundedLogoWidget(
+      height: 80,
+      borderRadius: 8.0,
+    ),
+  ),
+)
                   ),
                 const SizedBox(height: 16),
                 Text(

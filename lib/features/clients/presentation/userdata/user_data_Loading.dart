@@ -1,5 +1,5 @@
+import 'package:BCG_Store/common/theme/App_Theme.dart';
 import 'package:flutter/material.dart';
-import 'package:gerena/common/theme/App_Theme.dart';
 
 class UserDataLoading extends StatefulWidget {
   const UserDataLoading({Key? key}) : super(key: key);

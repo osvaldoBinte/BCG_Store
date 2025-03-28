@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
-import 'package:gerena/common/theme/App_Theme.dart';
+import 'package:BCG_Store/common/theme/App_Theme.dart';
 
 class AnimatedSuccessCheck extends StatefulWidget {
   const AnimatedSuccessCheck({Key? key}) : super(key: key);

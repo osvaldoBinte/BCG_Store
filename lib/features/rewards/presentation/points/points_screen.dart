@@ -1,10 +1,10 @@
+import 'package:BCG_Store/common/routes/navigation_service.dart';
+import 'package:BCG_Store/common/theme/App_Theme.dart';
+import 'package:BCG_Store/features/rewards/domain/entities/check_points_entitie.dart';
+import 'package:BCG_Store/features/rewards/presentation/points/check_point_controller.dart';
+import 'package:BCG_Store/features/rewards/presentation/points/points_loading.dart';
 import 'package:flutter/material.dart';
-import 'package:gerena/features/rewards/presentation/points/points_loading.dart';
 import 'package:get/get.dart';
-import 'package:gerena/common/routes/navigation_service.dart';
-import 'package:gerena/common/theme/App_Theme.dart';
-import 'package:gerena/features/rewards/presentation/points/check_point_controller.dart';
-import 'package:gerena/features/rewards/domain/entities/check_points_entitie.dart';
 
 class PointsScreen extends GetView<CheckPointController> {
   const PointsScreen({Key? key}) : super(key: key);
@@ -124,7 +124,6 @@ class PointsScreen extends GetView<CheckPointController> {
   }
 
   Widget _buildLoadingView() {
-    // Aquí reemplazamos el CircularProgressIndicator con nuestro CustomLoadingScreen
     return PointsLoading(
     );
   }
@@ -291,7 +290,6 @@ class PointsScreen extends GetView<CheckPointController> {
   }
 }
 
-// Controlador para manejar expansiones
 class ExpansionController extends GetxController {
   late List<RxBool> expandedItems;
   
@@ -299,7 +297,6 @@ class ExpansionController extends GetxController {
     required int itemCount,
     int? initialExpandedIndex,
   }) {
-    // Inicializa todos los items como colapsados excepto el initial si se proporciona
     expandedItems = List.generate(
       itemCount,
       (index) => (index == initialExpandedIndex).obs

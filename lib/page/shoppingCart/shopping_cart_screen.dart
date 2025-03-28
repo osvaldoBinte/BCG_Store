@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:gerena/common/routes/navigation_service.dart';
-import 'package:gerena/common/theme/App_Theme.dart';
+import 'package:BCG_Store/common/routes/navigation_service.dart';
+import 'package:BCG_Store/common/theme/App_Theme.dart';
 
 class ShoppingCartScreen extends StatefulWidget {
   const ShoppingCartScreen({Key? key}) : super(key: key);

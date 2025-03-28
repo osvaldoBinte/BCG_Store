@@ -1,7 +1,7 @@
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_credit_card/flutter_credit_card.dart';
-import 'package:gerena/common/theme/App_Theme.dart';
+import 'package:BCG_Store/common/theme/App_Theme.dart';
 
 class PaymentMethodController extends GetxController {
   // Variables para la tarjeta

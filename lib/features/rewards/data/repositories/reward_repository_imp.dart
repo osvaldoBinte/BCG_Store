@@ -1,11 +1,11 @@
-import 'package:gerena/features/rewards/data/datasources/reward_local_data_sources.dart';
-import 'package:gerena/features/rewards/domain/entities/check_points_entitie.dart';
-import 'package:gerena/features/rewards/domain/entities/clientes_app_rewards_entitie.dart';
-import 'package:gerena/features/rewards/domain/entities/get_data_sells_entitie.dart';
-import 'package:gerena/features/rewards/domain/repositories/reward_repository.dart';
-import 'package:gerena/common/services/auth_service.dart';
-import 'package:gerena/features/users/data/models/login_response.dart';
-import 'package:gerena/features/users/domain/repositories/user_repository.dart';
+
+import 'package:BCG_Store/common/services/auth_service.dart';
+import 'package:BCG_Store/features/rewards/data/datasources/reward_local_data_sources.dart';
+import 'package:BCG_Store/features/rewards/domain/entities/check_points_entitie.dart';
+import 'package:BCG_Store/features/rewards/domain/entities/clientes_app_rewards_entitie.dart';
+import 'package:BCG_Store/features/rewards/domain/entities/get_data_sells_entitie.dart';
+import 'package:BCG_Store/features/rewards/domain/repositories/reward_repository.dart';
+import 'package:BCG_Store/features/users/domain/repositories/user_repository.dart';
 
 class RewardRepositoryImp implements RewardRepository {
   final RewardLocalDataSources rewardLocalDataSources;

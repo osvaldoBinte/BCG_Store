@@ -1,4 +1,5 @@
-import 'package:gerena/features/rewards/domain/entities/check_points_entitie.dart';
+
+import 'package:BCG_Store/features/rewards/domain/entities/check_points_entitie.dart';
 
 class CheckPointModel extends CheckPointsEntitie {
   CheckPointModel({

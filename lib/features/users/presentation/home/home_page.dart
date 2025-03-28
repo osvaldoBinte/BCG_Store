@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:gerena/common/services/auth_service.dart';
-import 'package:gerena/common/theme/App_Theme.dart';
-import 'package:gerena/features/clients/presentation/profile/profile_page.dart';
-import 'package:gerena/page/store/store.dart';
+import 'package:BCG_Store/common/services/auth_service.dart';
+import 'package:BCG_Store/common/theme/App_Theme.dart';
+import 'package:BCG_Store/features/clients/presentation/profile/profile_page.dart';
+import 'package:BCG_Store/page/store/store.dart';
 import 'package:get/get.dart';
 import 'home_controller.dart';
 
@@ -35,9 +35,7 @@ class HomePage extends GetView<HomeController> {
           children: [
             Positioned.fill(  
               child: Obx(() {
-                // Si la tienda no está activa, mostrar solo el perfil
                 if (!_isTiendaActiva.value) {
-                  // Si estamos en la tienda pero está inactiva, cambiar al perfil
                   if (controller.selectedIndex.value == 0) {
                     controller.setIndex(1);
                   }
@@ -90,11 +88,9 @@ class HomePage extends GetView<HomeController> {
         child: Stack(
           alignment: Alignment.center,
           children: [
-            // Indicador animado de selección
             Obx(() => AnimatedPositioned(
               duration: const Duration(milliseconds: 300),
               curve: Curves.easeInOut,
-              // Calcular la posición de forma más precisa
               left: controller.selectedIndex.value == 0 
                   ? (MediaQuery.of(context).size.width - 32) / 4 - 30
                   : 3 * (MediaQuery.of(context).size.width - 32) / 4 - 30,
@@ -108,7 +104,6 @@ class HomePage extends GetView<HomeController> {
               ),
             )),
             
-            // Botones de navegación
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
@@ -159,32 +154,27 @@ class HomePage extends GetView<HomeController> {
     });
   }
 
-  // Método para verificar el estado de la tienda
   Future<void> _checkTiendaStatus() async {
     try {
       final authService = AuthService();
       final session = await authService.getSession();
       
       if (session != null) {
-        // Comprobar si la tienda está activa (1) o inactiva (0)
         final tiendaStatus = session.tienda_activa == "1";
         _isTiendaActiva.value = tiendaStatus;
         
         print('✅ Estado de la tienda: ${tiendaStatus ? "Activa" : "Inactiva"}');
         
-        // Si la tienda está inactiva y el usuario está en la página de tienda,
-        // redirigir automáticamente al perfil
+    
         if (!tiendaStatus && controller.selectedIndex.value == 0) {
           controller.setIndex(1);
         }
       } else {
-        // Si no hay sesión, asumimos que la tienda no está activa
         _isTiendaActiva.value = false;
         print('❌ No hay sesión activa');
       }
     } catch (e) {
       print('❌ Error al verificar el estado de la tienda: $e');
-      // Por defecto, si hay un error, no mostramos la tienda
       _isTiendaActiva.value = false;
     }
   }

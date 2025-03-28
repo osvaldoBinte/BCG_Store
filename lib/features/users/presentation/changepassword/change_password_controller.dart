@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:gerena/page/widgets/custom_alert_type.dart';
+import 'package:BCG_Store/page/widgets/custom_alert_type.dart';
 import 'package:get/get.dart';
-import 'package:gerena/features/users/domain/usecases/change_password_usecase.dart';
-import 'package:gerena/features/users/domain/entities/change_password_entitie.dart';
-import 'package:get/get_connect/http/src/utils/utils.dart';
+import 'package:BCG_Store/features/users/domain/usecases/change_password_usecase.dart';
+import 'package:BCG_Store/features/users/domain/entities/change_password_entitie.dart';
 
 class ChangePasswordController extends GetxController {
   final ChangePasswordUsecase changePasswordUsecase;

@@ -1,4 +1,4 @@
-import 'package:gerena/features/clients/domain/entities/client_data_entitie.dart';
+import 'package:BCG_Store/features/clients/domain/entities/client_data_entitie.dart';
 
 class ClienteDataModel  extends ClientDataEntitie{
 

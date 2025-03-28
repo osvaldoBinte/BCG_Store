@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:gerena/common/services/theme_service.dart';
-import 'package:gerena/features/users/presentation/login/login_controller.dart';
-import 'package:gerena/features/users/presentation/login/qr_scanner_widget.dart';
+import 'package:BCG_Store/common/services/theme_service.dart';
+import 'package:BCG_Store/common/widgets/rounded_logo_widget.dart';
+import 'package:BCG_Store/features/users/presentation/login/login_controller.dart';
+import 'package:BCG_Store/features/users/presentation/login/qr_scanner_widget.dart';
 import 'package:get/get.dart';
-import 'package:gerena/common/theme/App_Theme.dart';
+import 'package:BCG_Store/common/theme/App_Theme.dart';
 
 class LoginScreen extends StatelessWidget {
   LoginScreen({Key? key}) : super(key: key);
@@ -37,7 +38,10 @@ class LoginScreen extends StatelessWidget {
                   curve: Curves.easeInOut,
                   height: (controller.isLoginForm.value || 
                           controller.isRegisterForm.value || 
-                          controller.isQrScannerVisible.value)
+                          controller.isQrScannerVisible.value ||
+                          controller.isRecoveryForm.value ||
+                          controller.isTempPasswordForm.value ||
+                          controller.isChangePasswordForm.value)
                     ? screenSize.height * 0.25  // Reducido para evitar overflow
                     : screenSize.height * 0.35,
                   width: double.infinity,
@@ -58,27 +62,15 @@ class LoginScreen extends StatelessWidget {
       
   print('Mostrando logo URL: $url');
   
-  return ClipRRect(
-    borderRadius: BorderRadius.circular(16.0),
-    child: Image.network(
-      url,
+  return Padding(
+  padding: const EdgeInsets.only(bottom: 24.0),
+  child: Center(
+    child: RoundedLogoWidget(
       height: 160,
-      width: 300,
-      fit: BoxFit.contain,
-      errorBuilder: (context, error, stackTrace) {
-        print('Error cargando imagen: $error');
-        return ClipRRect(
-          borderRadius: BorderRadius.circular(16.0),
-          child: Image.network(
-            AppTheme.defaultLogoAsset,
-            height: 160,
-            width: 300,
-            fit: BoxFit.contain,
-          ),
-        );
-      },
+      borderRadius: 8.0,
     ),
-  );
+  ),
+);
 }),
                       const SizedBox(height: 20),
                       
@@ -102,6 +94,12 @@ class LoginScreen extends StatelessWidget {
                         return _buildRegisterForm(theme);
                       } else if (controller.isQrScannerVisible.value) {
                         return QRScannerWidget();
+                      } else if (controller.isRecoveryForm.value) {
+                        return _buildRecoveryForm(theme);
+                      } else if (controller.isTempPasswordForm.value) {
+                        return _buildTempPasswordForm(theme);
+                      } else if (controller.isChangePasswordForm.value) {
+                        return _buildChangePasswordForm(theme);
                       } else {
                         return _buildInitialContent(theme);
                       }
@@ -132,9 +130,6 @@ class LoginScreen extends StatelessWidget {
         ),
         const SizedBox(height: 32),
         
-        // Mostrar información de la base de datos si está disponible
-       
-        
         // Campo de entrada para correo electrónico (que será enviado como username)
         TextField(
           controller: controller.emailController,
@@ -151,17 +146,28 @@ class LoginScreen extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         
-        TextField(
+        Obx(() => TextField(
           controller: controller.passwordController,
           focusNode: controller.passwordFocusNode,
           decoration: InputDecoration(
             labelText: 'Contraseña',
             prefixIcon: Icon(Icons.lock, color: AppTheme.primaryColor),
+            suffixIcon: IconButton(
+              icon: Icon(
+                controller.isPasswordVisible.value 
+                  ? Icons.visibility_off 
+                  : Icons.visibility,
+                color: AppTheme.primaryColor,
+              ),
+              onPressed: () {
+                controller.isPasswordVisible.value = !controller.isPasswordVisible.value;
+              },
+            ),
           ),
-          obscureText: true,
+          obscureText: !controller.isPasswordVisible.value,
           textInputAction: TextInputAction.done,
           onSubmitted: (_) => controller.login(),
-        ),
+        )),
         const SizedBox(height: 32),
         
         // Botón de login con indicador de carga
@@ -202,6 +208,18 @@ class LoginScreen extends StatelessWidget {
         }),
         
         const SizedBox(height: 16),
+        
+        // Botón para recuperar contraseña
+        TextButton(
+          onPressed: controller.toggleRecoveryForm,
+          child: Text(
+            '¿Olvidaste tu contraseña?',
+            style: TextStyle(color: AppTheme.primaryColor),
+          ),
+        ),
+        
+        const SizedBox(height: 8),
+        
         TextButton(
           onPressed: () {
             // Volver a la pantalla inicial
@@ -211,6 +229,291 @@ class LoginScreen extends StatelessWidget {
             'Volver',
             style: TextStyle(color: AppTheme.primaryColor),
           ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildRecoveryForm(ThemeData theme) {
+    return Column(
+      key: const ValueKey('recovery_form'),
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          'RECUPERAR CONTRASEÑA',
+          style: theme.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: AppTheme.textTertiaryColor,
+          ),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 24),
+        
+        Text(
+          'Ingresa tu correo electrónico para recibir instrucciones de recuperación.',
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: AppTheme.textSecondaryColor,
+          ),
+          textAlign: TextAlign.center,
+        ),
+        
+        const SizedBox(height: 32),
+        
+        // Campo de correo electrónico para recuperación
+        TextField(
+          controller: controller.recoveryEmailController,
+          focusNode: controller.recoveryEmailFocusNode,
+          decoration: InputDecoration(
+            labelText: 'Correo electrónico',
+            prefixIcon: Icon(Icons.email, color: AppTheme.primaryColor),
+            hintText: 'ejemplo@correo.com',
+          ),
+          keyboardType: TextInputType.emailAddress,
+          textInputAction: TextInputAction.done,
+          onSubmitted: (_) => controller.recoverPassword(),
+        ),
+        
+        const SizedBox(height: 32),
+        
+        // Botón para enviar solicitud de recuperación
+        Obx(() => 
+          ElevatedButton(
+            onPressed: controller.isLoading.value ? null : controller.recoverPassword,
+            style: theme.elevatedButtonTheme.style,
+            child: controller.isLoading.value
+              ? SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: SpinKitHourGlass(
+                    color: AppTheme.primaryColor,
+                    size: 30.0,
+                  ),
+                )
+              : Text('RECUPERAR CONTRASEÑA'),
+          )
+        ),
+        
+        const SizedBox(height: 16),
+        
+        TextButton(
+          onPressed: controller.toggleLoginForm,
+          child: Text(
+            'Volver a Iniciar Sesión',
+            style: TextStyle(color: AppTheme.primaryColor),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTempPasswordForm(ThemeData theme) {
+    return Column(
+      key: const ValueKey('temp_password_form'),
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          'INGRESAR CONTRASEÑA TEMPORAL',
+          style: theme.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: AppTheme.textTertiaryColor,
+          ),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 24),
+        
+        Text(
+          'Por favor ingresa la contraseña temporal que recibiste en tu correo electrónico.',
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: AppTheme.textSecondaryColor,
+          ),
+          textAlign: TextAlign.center,
+        ),
+        
+        const SizedBox(height: 32),
+        
+        // Campo para contraseña temporal
+        Obx(() => TextField(
+          controller: controller.tempPasswordController,
+          focusNode: controller.tempPasswordFocusNode,
+          decoration: InputDecoration(
+            labelText: 'Contraseña Temporal',
+            prefixIcon: Icon(Icons.lock, color: AppTheme.primaryColor),
+            suffixIcon: IconButton(
+              icon: Icon(
+                controller.isTempPasswordVisible.value 
+                  ? Icons.visibility_off 
+                  : Icons.visibility,
+                color: AppTheme.primaryColor,
+              ),
+              onPressed: () {
+                controller.isTempPasswordVisible.value = !controller.isTempPasswordVisible.value;
+              },
+            ),
+          ),
+          obscureText: !controller.isTempPasswordVisible.value,
+          textInputAction: TextInputAction.done,
+          onSubmitted: (_) => controller.loginWithTempPassword(),
+        )),
+        
+        const SizedBox(height: 32),
+        
+        // Botón para continuar con la contraseña temporal
+        Obx(() => 
+          ElevatedButton(
+            onPressed: controller.isLoading.value ? null : controller.loginWithTempPassword,
+            style: theme.elevatedButtonTheme.style,
+            child: controller.isLoading.value
+              ? SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: SpinKitHourGlass(
+                    color: AppTheme.primaryColor,
+                    size: 30.0,
+                  ),
+                )
+              : Text('CONTINUAR'),
+          )
+        ),
+        
+        const SizedBox(height: 16),
+        
+        TextButton(
+          onPressed: controller.toggleLoginForm,
+          child: Text(
+            'Volver a Iniciar Sesión',
+            style: TextStyle(color: AppTheme.primaryColor),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildChangePasswordForm(ThemeData theme) {
+    return Column(
+      key: const ValueKey('change_password_form'),
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          'CAMBIAR CONTRASEÑA',
+          style: theme.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: AppTheme.textTertiaryColor,
+          ),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 24),
+        
+        Text(
+          'Por favor establece una nueva contraseña para tu cuenta.',
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: AppTheme.textSecondaryColor,
+          ),
+          textAlign: TextAlign.center,
+        ),
+        
+        const SizedBox(height: 32),
+        
+        // Campo para la contraseña actual (temporal)
+        Obx(() => TextField(
+          controller: controller.currentPasswordController,
+          focusNode: controller.currentPasswordFocusNode,
+          decoration: InputDecoration(
+            labelText: 'Contraseña Actual (recibida por correo)',
+            prefixIcon: Icon(Icons.lock_outline, color: AppTheme.primaryColor),
+            suffixIcon: IconButton(
+              icon: Icon(
+                controller.isCurrentPasswordVisible.value 
+                  ? Icons.visibility_off 
+                  : Icons.visibility,
+                color: AppTheme.primaryColor,
+              ),
+              onPressed: () {
+                controller.isCurrentPasswordVisible.value = !controller.isCurrentPasswordVisible.value;
+              },
+            ),
+          ),
+          obscureText: !controller.isCurrentPasswordVisible.value,
+          textInputAction: TextInputAction.next,
+          onSubmitted: (_) {
+            FocusScope.of(Get.context!).requestFocus(controller.newPasswordFocusNode);
+          },
+        )),
+        
+        const SizedBox(height: 16),
+        
+        // Campo para la nueva contraseña
+        Obx(() => TextField(
+          controller: controller.newPasswordController,
+          focusNode: controller.newPasswordFocusNode,
+          decoration: InputDecoration(
+            labelText: 'Nueva Contraseña',
+            prefixIcon: Icon(Icons.lock, color: AppTheme.primaryColor),
+            suffixIcon: IconButton(
+              icon: Icon(
+                controller.isNewPasswordVisible.value 
+                  ? Icons.visibility_off 
+                  : Icons.visibility,
+                color: AppTheme.primaryColor,
+              ),
+              onPressed: () {
+                controller.isNewPasswordVisible.value = !controller.isNewPasswordVisible.value;
+              },
+            ),
+          ),
+          obscureText: !controller.isNewPasswordVisible.value,
+          textInputAction: TextInputAction.next,
+          onSubmitted: (_) {
+            FocusScope.of(Get.context!).requestFocus(controller.confirmPasswordFocusNode);
+          },
+        )),
+        
+        const SizedBox(height: 16),
+        
+        // Campo para confirmar la nueva contraseña
+        Obx(() => TextField(
+          controller: controller.confirmPasswordController,
+          focusNode: controller.confirmPasswordFocusNode,
+          decoration: InputDecoration(
+            labelText: 'Confirmar Nueva Contraseña',
+            prefixIcon: Icon(Icons.lock_clock, color: AppTheme.primaryColor),
+            suffixIcon: IconButton(
+              icon: Icon(
+                controller.isConfirmPasswordVisible.value 
+                  ? Icons.visibility_off 
+                  : Icons.visibility,
+                color: AppTheme.primaryColor,
+              ),
+              onPressed: () {
+                controller.isConfirmPasswordVisible.value = !controller.isConfirmPasswordVisible.value;
+              },
+            ),
+          ),
+          obscureText: !controller.isConfirmPasswordVisible.value,
+          textInputAction: TextInputAction.done,
+          onSubmitted: (_) => controller.changePassword(),
+        )),
+        
+        const SizedBox(height: 32),
+        
+        // Botón para cambiar contraseña
+        Obx(() => 
+          ElevatedButton(
+            onPressed: controller.isLoading.value ? null : controller.changePassword,
+            style: theme.elevatedButtonTheme.style,
+            child: controller.isLoading.value
+              ? SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: SpinKitHourGlass(
+                    color: AppTheme.primaryColor,
+                    size: 30.0,
+                  ),
+                )
+              : Text('CAMBIAR CONTRASEÑA'),
+          )
         ),
       ],
     );
@@ -293,17 +596,28 @@ class LoginScreen extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         
-        TextField(
+        Obx(() => TextField(
           controller: controller.registerPasswordController,
           focusNode: controller.registerPasswordFocusNode,
           decoration: InputDecoration(
             labelText: 'Contraseña',
             prefixIcon: Icon(Icons.lock, color: AppTheme.primaryColor),
+            suffixIcon: IconButton(
+              icon: Icon(
+                controller.isRegisterPasswordVisible.value 
+                  ? Icons.visibility_off 
+                  : Icons.visibility,
+                color: AppTheme.primaryColor,
+              ),
+              onPressed: () {
+                controller.isRegisterPasswordVisible.value = !controller.isRegisterPasswordVisible.value;
+              },
+            ),
           ),
-          obscureText: true,
+          obscureText: !controller.isRegisterPasswordVisible.value,
           textInputAction: TextInputAction.done,
           onSubmitted: (_) => controller.register(),
-        ),
+        )),
         const SizedBox(height: 32),
         
         // Botón de registro con indicador de carga

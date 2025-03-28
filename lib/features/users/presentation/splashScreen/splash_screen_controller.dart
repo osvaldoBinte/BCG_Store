@@ -1,5 +1,5 @@
-import 'package:gerena/features/clients/domain/usecases/client_data_usecase.dart';
-import 'package:gerena/features/rewards/domain/usecases/check_point_usecase.dart';
+import 'package:BCG_Store/features/clients/domain/usecases/client_data_usecase.dart';
+import 'package:BCG_Store/features/rewards/domain/usecases/check_point_usecase.dart';
 import 'package:get/get.dart';
 
 class SplashScreenController extends GetxController {

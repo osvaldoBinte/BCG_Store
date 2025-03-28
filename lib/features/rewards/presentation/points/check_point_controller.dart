@@ -1,8 +1,7 @@
+import 'package:BCG_Store/features/rewards/domain/entities/check_points_entitie.dart';
+import 'package:BCG_Store/features/rewards/domain/usecases/check_point_usecase.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:gerena/features/rewards/domain/entities/check_points_entitie.dart';
-import 'package:gerena/features/rewards/domain/usecases/check_point_usecase.dart';
-
 class CheckPointController extends GetxController {
   final CheckPointUsecase checkPointUsecase;
 

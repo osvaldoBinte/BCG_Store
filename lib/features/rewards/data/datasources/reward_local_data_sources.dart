@@ -1,12 +1,11 @@
 import 'dart:convert';
-
-import 'package:gerena/common/constants/constants.dart';
-import 'package:gerena/features/rewards/data/models/check_point_model.dart';
-import 'package:gerena/features/rewards/data/models/clientes_app_rewards_model.dart';
-import 'package:gerena/features/rewards/data/models/get_data_sells_model.dart';
-import 'package:gerena/features/rewards/domain/entities/check_points_entitie.dart';
-import 'package:gerena/features/rewards/domain/entities/clientes_app_rewards_entitie.dart';
-import 'package:gerena/features/rewards/domain/entities/get_data_sells_entitie.dart';
+import 'package:BCG_Store/common/constants/constants.dart';
+import 'package:BCG_Store/features/rewards/data/models/check_point_model.dart';
+import 'package:BCG_Store/features/rewards/data/models/clientes_app_rewards_model.dart';
+import 'package:BCG_Store/features/rewards/data/models/get_data_sells_model.dart';
+import 'package:BCG_Store/features/rewards/domain/entities/check_points_entitie.dart';
+import 'package:BCG_Store/features/rewards/domain/entities/clientes_app_rewards_entitie.dart';
+import 'package:BCG_Store/features/rewards/domain/entities/get_data_sells_entitie.dart';
 import 'package:http/http.dart' as http;
 
 abstract class RewardLocalDataSources {
@@ -25,9 +24,6 @@ class RewardLocalDataSourcesImpl implements RewardLocalDataSources {
   @override
   Future<List<CheckPointsEntitie>> getRewards(String token,String id_cliente) async {
   try {
-    print('⭐ Iniciando getRewards');
-    print('⭐ Token: ${token.substring(0, 10)}...'); 
-    print('⭐ Token 2: $defaultApiServer/check_points/$id_cliente.');
 
     final response = await http.get(
       Uri.parse('$defaultApiServer/check_points/$id_cliente'),

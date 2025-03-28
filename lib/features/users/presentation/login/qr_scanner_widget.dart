@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
-import 'package:gerena/common/theme/App_Theme.dart';
+import 'package:BCG_Store/common/theme/App_Theme.dart';
 import 'package:get/get.dart';
-import 'package:gerena/features/users/presentation/login/login_controller.dart';
+import 'package:BCG_Store/features/users/presentation/login/login_controller.dart';
 
 class QRScannerWidget extends StatefulWidget {
   QRScannerWidget({Key? key}) : super(key: key);

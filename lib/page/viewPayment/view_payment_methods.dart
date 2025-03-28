@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:gerena/common/theme/App_Theme.dart';
-import 'package:gerena/page/payment/add_payment_method.dart';
-import 'package:gerena/page/viewPayment/payment_methods_controller.dart';
+import 'package:BCG_Store/common/theme/App_Theme.dart';
+import 'package:BCG_Store/page/payment/add_payment_method.dart';
+import 'package:BCG_Store/page/viewPayment/payment_methods_controller.dart';
 import 'package:get/get.dart';
 
 class ViewPaymentMethodsScreen extends StatelessWidget {

@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:gerena/common/settings/routes_names.dart';
-import 'package:gerena/features/rewards/presentation/updateaccountdata/update_account_data_page.dart';
-import 'package:gerena/features/users/presentation/changepassword/change_password_page.dart';
-import 'package:gerena/features/users/presentation/splashScreen/splash_screen.dart';
-import 'package:gerena/features/users/presentation/home/home_page.dart';
-import 'package:gerena/features/users/presentation/login/Login_screen.dart';
-import 'package:gerena/features/rewards/presentation/points/points_screen.dart';
-import 'package:gerena/features/rewards/presentation/getDataSells/get_data_sells_page.dart';
-import 'package:gerena/page/shoppingCart/shopping_cart_screen.dart';
-import 'package:gerena/features/clients/presentation/userdata/user_data_page.dart';
+import 'package:BCG_Store/common/settings/routes_names.dart';
+import 'package:BCG_Store/features/rewards/presentation/updateaccountdata/update_account_data_page.dart';
+import 'package:BCG_Store/features/users/presentation/changepassword/change_password_page.dart';
+import 'package:BCG_Store/features/users/presentation/splashScreen/splash_screen.dart';
+import 'package:BCG_Store/features/users/presentation/home/home_page.dart';
+import 'package:BCG_Store/features/users/presentation/login/Login_screen.dart';
+import 'package:BCG_Store/features/rewards/presentation/points/points_screen.dart';
+import 'package:BCG_Store/features/rewards/presentation/getDataSells/get_data_sells_page.dart';
+import 'package:BCG_Store/page/shoppingCart/shopping_cart_screen.dart';
+import 'package:BCG_Store/features/clients/presentation/userdata/user_data_page.dart';
 import 'package:get/get.dart';
 class AppPages {
   static final routes = [

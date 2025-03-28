@@ -1,9 +1,8 @@
+import 'package:BCG_Store/features/clients/domain/entities/client_data_entitie.dart';
+import 'package:BCG_Store/features/clients/domain/usecases/client_data_usecase.dart';
+import 'package:BCG_Store/features/rewards/domain/entities/clientes_app_rewards_entitie.dart';
+import 'package:BCG_Store/features/rewards/domain/usecases/get_clientes_app_rewards.dart';
 import 'package:get/get.dart';
-import 'package:gerena/features/clients/domain/entities/client_data_entitie.dart';
-import 'package:gerena/features/clients/domain/usecases/client_data_usecase.dart';
-import 'package:gerena/features/rewards/domain/entities/clientes_app_rewards_entitie.dart';
-import 'package:gerena/features/rewards/domain/usecases/get_clientes_app_rewards.dart';
-
 class UserDataController extends GetxController {
   final ClientDataUsecase clientDataUsecase;
   final GetClientesAppRewards getClientesAppRewards;

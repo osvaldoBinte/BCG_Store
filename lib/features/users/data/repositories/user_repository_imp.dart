@@ -1,9 +1,10 @@
-import 'package:gerena/common/services/auth_service.dart';
-import 'package:gerena/features/users/data/datasources/user_local_data_sources.dart';
-import 'package:gerena/features/users/data/models/login_response.dart';
-import 'package:gerena/features/users/domain/entities/change_password_entitie.dart';
-import 'package:gerena/features/users/domain/entities/register_entitie.dart';
-import 'package:gerena/features/users/domain/repositories/user_repository.dart';
+
+import 'package:BCG_Store/common/services/auth_service.dart';
+import 'package:BCG_Store/features/users/data/datasources/user_local_data_sources.dart';
+import 'package:BCG_Store/features/users/data/models/login_response.dart';
+import 'package:BCG_Store/features/users/domain/entities/change_password_entitie.dart';
+import 'package:BCG_Store/features/users/domain/entities/register_entitie.dart';
+import 'package:BCG_Store/features/users/domain/repositories/user_repository.dart';
 
 class UserRepositoryImpl implements UserRepository {
   final UserLocalDataSources userLocalDataSources;
@@ -33,6 +34,11 @@ Future changePassword(ChangePasswordEntitie change_password_entitie) async {
   @override
   Future registerUser(RegisterEntitie registerEntitie) {
     return userLocalDataSources.registerUser(registerEntitie);
+  }
+  
+  @override
+  Future<void> recoveryPassword(String email) async{
+    return await userLocalDataSources.recoveryPassword(email);
   }
 
 }

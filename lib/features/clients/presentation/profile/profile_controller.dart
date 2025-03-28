@@ -1,18 +1,16 @@
+import 'package:BCG_Store/common/theme/App_Theme.dart';
+import 'package:BCG_Store/features/clients/domain/entities/client_data_entitie.dart';
+import 'package:BCG_Store/features/clients/domain/usecases/client_data_usecase.dart';
+import 'package:BCG_Store/features/rewards/presentation/points/custom_loading_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:gerena/features/clients/domain/entities/client_data_entitie.dart';
-import 'package:gerena/features/clients/domain/usecases/client_data_usecase.dart';
-import 'package:gerena/features/rewards/presentation/points/custom_loading_screen.dart';
 import 'package:get/get.dart';
 import 'package:flutter/services.dart';
-import 'package:gerena/common/theme/App_Theme.dart';
-// Importaciones modificadas
 import 'qr_loading_widget.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:http/http.dart' as http;
 import 'package:share_plus/share_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
-// Importamos dio para una descarga más robusta
 import 'package:dio/dio.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 

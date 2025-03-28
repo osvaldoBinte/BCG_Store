@@ -1,8 +1,8 @@
 import 'dart:convert';
 
-import 'package:gerena/common/constants/constants.dart';
-import 'package:gerena/features/clients/data/models/cliente_data_model.dart';
-import 'package:gerena/features/clients/domain/entities/client_data_entitie.dart';
+import 'package:BCG_Store/common/constants/constants.dart';
+import 'package:BCG_Store/features/clients/data/models/cliente_data_model.dart';
+import 'package:BCG_Store/features/clients/domain/entities/client_data_entitie.dart';
 import 'package:http/http.dart' as http;
 
 abstract class ClientLocalDataSources {
@@ -30,8 +30,8 @@ Future<List<ClientDataEntitie>> getclientdata(String token) async {
       print('⭐ Cuerpo de respuesta: ${response.body}');
       
       // Decodificamos el JSON
-      final dynamic jsonData = json.decode(response.body);
-      
+      final dynamic jsonData = json.decode(utf8.decode(response.bodyBytes));      
+
       // Verificamos si el resultado es un objeto o una lista
       if (jsonData is Map<String, dynamic>) {
         print('⭐ Recibido un objeto único');

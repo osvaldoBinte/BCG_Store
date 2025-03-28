@@ -1,5 +1,5 @@
-import 'package:gerena/features/users/domain/entities/register_entitie.dart';
-import 'package:gerena/features/users/domain/repositories/user_repository.dart';
+import 'package:BCG_Store/features/users/domain/entities/register_entitie.dart';
+import 'package:BCG_Store/features/users/domain/repositories/user_repository.dart';
 
 class RegisterUsecase {
   final UserRepository userRepository;
