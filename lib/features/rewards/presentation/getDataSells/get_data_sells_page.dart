@@ -309,16 +309,7 @@ class _GetDataSellsPageState extends State<GetDataSellsPage> with TickerProvider
           );
         }
       }),
-      floatingActionButton: Obx(() => controller.isLoading.value
-        ? SizedBox() 
-        : FloatingActionButton(
-            onPressed: () {
-              forceReload();
-            },
-            backgroundColor: AppTheme.primaryColor,
-            child: Icon(Icons.refresh, color: AppTheme.backgroundColor),
-          )
-      ),
+      
     );
   }
 

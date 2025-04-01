@@ -50,10 +50,9 @@ class PointsScreen extends GetView<CheckPointController> {
   }
 
   Widget _buildContentView(BuildContext context) {
-    // Creamos el controlador de expansión
     final expansionController = Get.put(ExpansionController(
       itemCount: controller.checkPoints.length,
-      initialExpandedIndex: 0 // Primer elemento expandido inicialmente
+      initialExpandedIndex: 0 
     ));
     
     return Column(
@@ -110,7 +109,8 @@ class PointsScreen extends GetView<CheckPointController> {
       itemBuilder: (context, index) {
         final checkPoint = controller.checkPoints[index];
         // El primer elemento es negativo (rojo), el resto positivos
-        final bool isPositive = index != 0;
+              final bool isPositive = true;
+
         
         return PointCard(
           checkPoint: checkPoint,
@@ -351,7 +351,6 @@ class PointCard extends StatelessWidget {
           // Parte superior - siempre visible e interactiva
           InkWell(
             onTap: () {
-              // Toggle para expandir/contraer cuando se toca
               expansionController.toggleExpansion(index);
             },
             child: Padding(

@@ -21,7 +21,6 @@ class _PointsLoadingState extends State<PointsLoading>
       vsync: this,
     )..repeat(reverse: false);
     
-    // Crea una animación para el efecto shimmer
     _shimmerAnimation = Tween<double>(begin: -1.0, end: 2.0).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeInOutSine),
     );
@@ -43,10 +42,8 @@ class _PointsLoadingState extends State<PointsLoading>
         builder: (context, child) {
           return Column(
             children: [
-              // Cabecera con puntos totales (skeleton)
               _buildHeaderSectionSkeleton(),
               
-              // Lista de puntos (skeleton)
               Expanded(
                 child: _buildPointsListSkeleton(context),
               ),
@@ -57,7 +54,6 @@ class _PointsLoadingState extends State<PointsLoading>
     );
   }
   
-  // Crea un widget con efecto shimmer usando un gradiente
   Widget _buildShimmerBox({required Widget child}) {
     return AnimatedBuilder(
       animation: _shimmerAnimation,

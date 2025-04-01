@@ -474,13 +474,13 @@ class LoginController extends GetxController {
       await recoveryPasswordUsecase.execute(recoveryEmailController!.text);
       
       recoveryEmail.value = recoveryEmailController!.text;
-      
+          showTempPasswordForm();
+
       _showSuccessAlert(
         'Contraseña restablecida con éxito',
         'Por favor, verifica tu correo electrónico para obtener la contraseña temporal.',
         onConfirm: () {
           Get.back();
-          showTempPasswordForm();
         }
       );
       
@@ -534,13 +534,15 @@ class LoginController extends GetxController {
         return;
       }
       
-      final result = await loginUsecase.execute(
+      final loginResponse = await loginUsecase.execute(
         recoveryEmail.value,
         tempPasswordController!.text,
         baseDatos
       );
       
-      print('Login con contraseña temporal exitoso: $result');
+        final authService = AuthService();
+      final bool saved = await authService.saveLoginResponse(loginResponse);
+      print('Login con contraseña temporal exitoso: $loginResponse');
       
       currentPasswordController?.text = tempPasswordController!.text;
       

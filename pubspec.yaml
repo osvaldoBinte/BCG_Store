@@ -53,9 +53,9 @@ dependencies:
 flutter_launcher_icons:
   android: true
   ios: true
-  image_path: "assets/logo-binteStore.png" 
+  image_path: "assets/bcg_store.png" 
   adaptive_icon_background: "#3F3F3F" 
-  adaptive_icon_foreground: "assets/logo-binteStore.png"
+  adaptive_icon_foreground: "assets/bcg_store.png"
 
 dev_dependencies:
   flutter_test:

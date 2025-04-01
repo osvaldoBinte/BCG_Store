@@ -43,18 +43,7 @@ class _GetDataSellsLoadingState extends State<GetDataSellsLoading>
           return _buildPurchasesListSkeleton(context);
         },
       ),
-      floatingActionButton: Container(
-        width: 56,
-        height: 56,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: AppTheme.primaryColor.withOpacity(0.7),
-        ),
-        child: Icon(
-          Icons.refresh,
-          color: AppTheme.backgroundColor.withOpacity(0.5),
-        ),
-      ),
+    
     );
   }
   

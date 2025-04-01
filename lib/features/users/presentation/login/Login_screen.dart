@@ -11,7 +11,6 @@ import 'package:BCG_Store/common/theme/App_Theme.dart';
 class LoginScreen extends StatelessWidget {
   LoginScreen({Key? key}) : super(key: key);
 
-  // Usar Get.find() para obtener el controlador ya inyectado por el binding
   final LoginController controller = Get.find<LoginController>();
 
   @override
@@ -62,12 +61,14 @@ class LoginScreen extends StatelessWidget {
       
   print('Mostrando logo URL: $url');
   
-  return Padding(
+  return  Padding(
   padding: const EdgeInsets.only(bottom: 24.0),
   child: Center(
     child: RoundedLogoWidget(
       height: 160,
+      width: MediaQuery.of(context).size.width * 0.7, // Limita el ancho al 70% del ancho de la pantalla
       borderRadius: 8.0,
+      fit: BoxFit.contain, // Asegura que la imagen se ajuste dentro del contenedor
     ),
   ),
 );
@@ -170,7 +171,6 @@ class LoginScreen extends StatelessWidget {
         )),
         const SizedBox(height: 32),
         
-        // Botón de login con indicador de carga
         Obx(() => 
           ElevatedButton(
             onPressed: controller.isLoading.value ? null : controller.login,
@@ -190,7 +190,6 @@ class LoginScreen extends StatelessWidget {
         
         const SizedBox(height: 16),
         
-        // Si no hay base_datos, mostrar botón para escanear QR
         Obx(() {
           final baseDatos = controller.qrClientData.value['base_datos'];
           if (baseDatos == null || baseDatos.toString().isEmpty) {

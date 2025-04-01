@@ -3,6 +3,7 @@ import 'package:BCG_Store/common/services/auth_service.dart';
 import 'package:BCG_Store/common/theme/App_Theme.dart';
 import 'package:BCG_Store/features/clients/presentation/userdata/user_data_Loading.dart';
 import 'package:BCG_Store/features/clients/presentation/userdata/user_data_controller.dart';
+import 'package:BCG_Store/page/widgets/custom_alert_type.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -194,8 +195,23 @@ class UserDataPage extends StatelessWidget {
                             icon: Icons.logout,
                             label: "Cerrar Sesión",
                             onTap: () async {
+                              if (Get.context != null) {
+      showCustomAlert(
+        context: Get.context!,
+         title: 'Cerrar sesión',
+      message: '¿Estás seguro de que deseas cerrar sesión?',
+        type: CustomAlertType.error,
+         confirmText: 'Sí',
+      cancelText: 'No',
+      onConfirm: () async {
+
                               AuthService().logout();
-                              Get.offAllNamed('/login');
+                              Get.offAllNamed('/login');      },
+      onCancel: () {
+        Navigator.of(Get.context!).pop();
+      },
+      );
+    }
                             },
                           ),
                         ),
@@ -308,14 +324,14 @@ class UserDataPage extends StatelessWidget {
                     },
                   ),
                   
-                  _buildMenuListItem(
+                /*   _buildMenuListItem(
                     icon: Icons.info,
                     iconColor: AppTheme.primaryColor,
                     title: "Ayuda",
                     subtitle: "¿Te gustaría que te ayude con algo más relacionado a tu aplicación?",
                     onTap: () {
                     },
-                  ),
+                  ),*/
                   
                   _buildMenuListItem(
                     icon: Icons.lock,
@@ -326,14 +342,14 @@ class UserDataPage extends StatelessWidget {
                     },
                   ),
                   
-                  _buildMenuListItem(
+                 /* _buildMenuListItem(
                     icon: Icons.person_remove,
                     iconColor: AppTheme.errorColor,
                     title: "Eliminar cuenta",
                     subtitle: "Elimina tu cuenta de forma permanente",
                     onTap: () {
                     },
-                  ),
+                  ),*/
                   
                   const SizedBox(height: 32),
                 ],

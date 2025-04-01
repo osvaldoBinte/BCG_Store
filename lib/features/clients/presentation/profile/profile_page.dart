@@ -381,7 +381,7 @@ final RxInt _currentPage = 0.obs;
                         
                         const SizedBox(height: 16),
                         Text(
-                          'Utilízalo en nuestras tiendas para agilizar tus compras, devoluciones y disfrutar beneficios exclusivos.',
+                          '¡Bienvenido! Disfruta de una experiencia de compra más ágil y exclusiva en nuestras tiendas, con beneficios especiales para ti..',
                           style: AppTheme.theme.textTheme.bodyLarge?.copyWith(
                             color: AppTheme.secondaryColor,
                           ),

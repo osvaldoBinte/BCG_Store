@@ -10,7 +10,7 @@ class RoundedLogoWidget extends StatelessWidget {
   
   final double borderRadius;
   
-  final Color? backgroundColor;
+  final Color? backgroundColor; 
   final EdgeInsetsGeometry? padding;
   
   final BoxFit fit;
@@ -30,8 +30,7 @@ class RoundedLogoWidget extends StatelessWidget {
     this.customErrorBuilder,
     this.customUrl,
   }) : super(key: key);
-
-  @override
+ @override
   Widget build(BuildContext context) {
     return Obx(() {
       final url = customUrl ?? 
@@ -41,6 +40,10 @@ class RoundedLogoWidget extends StatelessWidget {
       
       return Container(
         padding: padding,
+        constraints: BoxConstraints(
+          maxWidth: width ?? MediaQuery.of(context).size.width * 0.7, // Limita el ancho máximo
+          maxHeight: height,
+        ),
         decoration: BoxDecoration(
           color: backgroundColor,
           borderRadius: BorderRadius.circular(borderRadius),
@@ -49,8 +52,6 @@ class RoundedLogoWidget extends StatelessWidget {
           borderRadius: BorderRadius.circular(borderRadius),
           child: Image.network(
             url,
-            height: height,
-            width: width,
             fit: fit,
             errorBuilder: customErrorBuilder ?? (context, error, stackTrace) {
               print('Error cargando imagen: $error');
@@ -58,8 +59,6 @@ class RoundedLogoWidget extends StatelessWidget {
                 borderRadius: BorderRadius.circular(borderRadius),
                 child: Image.network(
                   AppTheme.defaultLogoAsset,
-                  height: height,
-                  width: width,
                   fit: fit,
                 ),
               );
