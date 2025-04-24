@@ -5,7 +5,7 @@ import 'package:BCG_Store/features/users/presentation/changepassword/change_pass
 import 'package:BCG_Store/features/users/presentation/splashScreen/splash_screen.dart';
 import 'package:BCG_Store/features/users/presentation/home/home_page.dart';
 import 'package:BCG_Store/features/users/presentation/login/Login_screen.dart';
-import 'package:BCG_Store/features/rewards/presentation/points/points_screen.dart';
+import 'package:BCG_Store/features/rewards/presentation/points/points_page.dart';
 import 'package:BCG_Store/features/rewards/presentation/getDataSells/get_data_sells_page.dart';
 import 'package:BCG_Store/page/shoppingCart/shopping_cart_screen.dart';
 import 'package:BCG_Store/features/clients/presentation/userdata/user_data_page.dart';

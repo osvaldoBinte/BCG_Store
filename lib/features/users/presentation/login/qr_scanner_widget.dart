@@ -19,22 +19,18 @@ class _QRScannerWidgetState extends State<QRScannerWidget> {
   @override
   void initState() {
     super.initState();
-    // Inicializamos el controller aquí para asegurarnos de que sea nuevo cada vez
     scannerController = MobileScannerController(
       detectionSpeed: DetectionSpeed.normal,
       facing: CameraFacing.back,
       torchEnabled: false,
-      // Añadir formatos específicos de códigos QR y barras
       formats: [BarcodeFormat.qrCode],
     );
     
-    // Asignamos el controller al controlador principal
     controller.qrScannerController = scannerController;
   }
   
   @override
   void dispose() {
-    // Nos aseguramos de liberar los recursos del scanner al salir
     scannerController.dispose();
     super.dispose();
   }

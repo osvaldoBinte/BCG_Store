@@ -1,8 +1,10 @@
 import 'package:BCG_Store/common/constants/constants.dart';
 import 'package:BCG_Store/common/routes/navigation_service.dart';
 import 'package:BCG_Store/common/services/auth_service.dart';
+import 'package:BCG_Store/features/users/domain/usecases/update_token_usecase.dart';
 import 'package:BCG_Store/framework/preferences_service.dart';
 import 'package:BCG_Store/page/widgets/custom_alert_type.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
@@ -25,6 +27,8 @@ class LoginController extends GetxController {
   FocusNode? recoveryEmailFocusNode;
   FocusNode? tempPasswordFocusNode;
   
+  FirebaseMessaging messaging = FirebaseMessaging.instance;
+
   TextEditingController? currentPasswordController;
   TextEditingController? newPasswordController; 
   TextEditingController? confirmPasswordController;
@@ -69,12 +73,15 @@ class LoginController extends GetxController {
   final RegisterUsecase registerUsecase;
   final RecoveryPasswordUsecase recoveryPasswordUsecase;
   final ChangePasswordUsecase changePasswordUsecase;
+  final UpdateTokenUsecase updateTokenUsecase;
   
   LoginController({
     required this.loginUsecase,
     required this.registerUsecase,
     required this.recoveryPasswordUsecase,
     required this.changePasswordUsecase,
+    required this.updateTokenUsecase,
+
   });
   
   @override
@@ -434,8 +441,11 @@ class LoginController extends GetxController {
         );
         final authService = AuthService();
       final bool saved = await authService.saveLoginResponse(loginResponse);
-        print('Login exitoso: $loginResponse');
-        
+      if (saved) {
+       
+      String? token = await messaging.getToken();
+      await updateTokenUsecase.execute(token);
+      }        
         emailController?.clear();
         passwordController?.clear();
         isLoading.value = false;
@@ -541,8 +551,12 @@ class LoginController extends GetxController {
       );
       
         final authService = AuthService();
-      final bool saved = await authService.saveLoginResponse(loginResponse);
-      print('Login con contraseña temporal exitoso: $loginResponse');
+        final bool saved = await authService.saveLoginResponse(loginResponse);
+      if (saved) {
+       
+      String? token = await messaging.getToken();
+      await updateTokenUsecase.execute(token);
+      }  
       
       currentPasswordController?.text = tempPasswordController!.text;
       
@@ -637,13 +651,15 @@ class LoginController extends GetxController {
       
       try {
         isLoading.value = true;
-        
+    String? token = await messaging.getToken();
+debugPrint('Token de Firebase: $token');
         final registerEntity = RegisterEntitie(
           first_name: firstNameController!.text,
           last_name: lastNameController!.text,
           id_cliente: int.parse(qrClientData.value['id_cliente'].toString()),
           email: emailRegisterController!.text,
           password: registerPasswordController!.text,
+          token_device: token,
         );
         
         await registerUsecase.register(registerEntity);

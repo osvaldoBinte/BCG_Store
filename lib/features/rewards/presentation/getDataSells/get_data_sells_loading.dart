@@ -245,7 +245,7 @@ class _GetDataSellsLoadingState extends State<GetDataSellsLoading>
                   ],
                 ),
                 const SizedBox(height: 8),
-                Row(
+               /* Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
@@ -263,7 +263,7 @@ class _GetDataSellsLoadingState extends State<GetDataSellsLoading>
                       ),
                     ),
                   ],
-                ),
+                ),*/
                 const Divider(height: 24),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,

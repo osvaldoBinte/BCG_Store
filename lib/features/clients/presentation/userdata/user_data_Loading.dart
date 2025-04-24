@@ -21,7 +21,6 @@ class _UserDataLoadingState extends State<UserDataLoading>
       vsync: this,
     )..repeat(reverse: false);
     
-    // Crea una animación para el efecto shimmer
     _shimmerAnimation = Tween<double>(begin: -1.0, end: 2.0).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeInOutSine),
     );

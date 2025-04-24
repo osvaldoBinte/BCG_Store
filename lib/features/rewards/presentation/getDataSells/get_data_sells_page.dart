@@ -2,6 +2,7 @@ import 'package:BCG_Store/common/constants/constants.dart';
 import 'package:BCG_Store/common/routes/navigation_service.dart';
 import 'package:BCG_Store/common/theme/App_Theme.dart';
 import 'package:BCG_Store/features/rewards/domain/entities/get_data_sells_entitie.dart';
+import 'package:BCG_Store/features/rewards/presentation/getDataSells/expandable_purchase_card.dart';
 import 'package:BCG_Store/features/rewards/presentation/getDataSells/get_data_sells_controller.dart';
 import 'package:BCG_Store/features/rewards/presentation/getDataSells/get_data_sells_loading.dart';
 import 'package:BCG_Store/framework/preferences_service.dart';
@@ -9,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'dart:convert';
+
 class GetDataSellsPage extends StatefulWidget {
   const GetDataSellsPage({Key? key}) : super(key: key);
 
@@ -249,7 +251,6 @@ class _GetDataSellsPageState extends State<GetDataSellsPage> with TickerProvider
           );
         }
         
-        // Solo mostrar error si hay un mensaje de error y NO es una respuesta vacía
         if (controller.errorMessage.value.isNotEmpty && !controller.emptyResponse.value) {
           return Center(
             child: Column(
@@ -290,7 +291,6 @@ class _GetDataSellsPageState extends State<GetDataSellsPage> with TickerProvider
           );
         }
         
-        // Construir el TabBarView con el número correcto de pestañas
         if (isTiendaActiva.value && tabController!.length == 2) {
           return TabBarView(
             controller: tabController!,
@@ -300,7 +300,6 @@ class _GetDataSellsPageState extends State<GetDataSellsPage> with TickerProvider
             ],
           );
         } else {
-          // Si solo hay una pestaña (Tienda)
           return TabBarView(
             controller: tabController!,
             children: [
@@ -363,7 +362,6 @@ class _GetDataSellsPageState extends State<GetDataSellsPage> with TickerProvider
     );
   }
 
-  // Estado vacío para la sección TIENDA (sin botón)
   Widget _buildEmptyStateTienda(BuildContext context) {
     final theme = Theme.of(context);
 
@@ -398,20 +396,17 @@ class _GetDataSellsPageState extends State<GetDataSellsPage> with TickerProvider
     );
   }
 
-  // Nuevo método para mostrar las compras desde la API
   Widget _buildPurchasesListFromAPI(BuildContext context) {
     if (purchasesByFolio.isEmpty) {
-      // Si estamos en la pestaña de tienda física o solo hay una pestaña
       if (!isTiendaActiva.value || selectedTab.value == 1 || tabController!.length == 1) {
         return _buildEmptyStateTienda(context);
       } else {
-        // Si estamos en la pestaña online
         return _buildEmptyStateOnline(context);
       }
     }
 
     final folios = purchasesByFolio.keys.toList();
-    folios.sort((a, b) => b.compareTo(a)); // Ordenar por folio descendente (más reciente primero)
+    folios.sort((a, b) => b.compareTo(a));
 
     return RefreshIndicator(
       onRefresh: () async => forceReload(),
@@ -422,223 +417,16 @@ class _GetDataSellsPageState extends State<GetDataSellsPage> with TickerProvider
         itemBuilder: (context, index) {
           final folio = folios[index];
           final items = purchasesByFolio[folio] ?? [];
-          return _buildPurchaseCardFromAPI(context, folio, items);
+          return ExpandablePurchaseCard(
+            folio: folio,
+            items: items,
+            fecha: getPurchaseDate(folio),
+            total: getPurchaseTotal(folio),
+            subtotal: getPurchaseSubtotal(folio),
+            iva: getPurchaseIVA(folio),
+            formaPago: getPurchasePaymentMethod(folio),
+          );
         },
-      ),
-    );
-  }
-
-  Widget _buildPurchaseCardFromAPI(BuildContext context, String folio, List<GetDataSellsEntitie> items) {
-    final theme = Theme.of(context);
-    final fecha = getPurchaseDate(folio);
-    final total = getPurchaseTotal(folio);
-    final subtotal = getPurchaseSubtotal(folio);
-    final iva = getPurchaseIVA(folio);
-    final formaPago = getPurchasePaymentMethod(folio);
-    
-    // Formato de fecha
-    String formattedDate = '';
-    try {
-      final parsedDate = DateTime.parse(fecha);
-      formattedDate = DateFormat('dd MMM yyyy', 'es_ES').format(parsedDate);
-    } catch (e) {
-      formattedDate = fecha;
-    }
-
-    return Card(
-      margin: const EdgeInsets.only(bottom: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Encabezado de la compra
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Orden #$folio',
-                      style: theme.textTheme.titleLarge?.copyWith(
-                        color: AppTheme.primaryColor,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Fecha: $formattedDate',
-                      style: AppTheme.fieldLabelStyle,
-                    ),
-                  ],
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: AppTheme.primaryColor.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: Text(
-                    'Entregado',
-                    style: TextStyle(
-                      color: AppTheme.primaryColor,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          
-          const Divider(height: 1),
-          
-          // Productos
-          ...items.map((item) => _buildProductItemFromAPI(context, item)).toList(),
-          
-          // Pie de la compra
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: AppTheme.backgroundGrey,
-              borderRadius: const BorderRadius.only(
-                bottomLeft: Radius.circular(12),
-                bottomRight: Radius.circular(12),
-              ),
-            ),
-            child: Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Subtotal:',
-                      style: AppTheme.fieldLabelStyle,
-                    ),
-                    Text(
-                      '\$${subtotal.toStringAsFixed(2)}',
-                      style: AppTheme.fieldValueStyle,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'IVA:',
-                      style: AppTheme.fieldLabelStyle,
-                    ),
-                    Text(
-                      '\$${iva.toStringAsFixed(2)}',
-                      style: AppTheme.fieldValueStyle,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Forma de pago:',
-                      style: AppTheme.fieldLabelStyle,
-                    ),
-                    Text(
-                      formaPago,
-                      style: AppTheme.fieldValueStyle,
-                    ),
-                  ],
-                ),
-                const Divider(height: 24),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Total:',
-                      style: theme.textTheme.bodyLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Text(
-                      '\$${total.toStringAsFixed(2)}',
-                      style: theme.textTheme.bodyLarge?.copyWith(
-                        color: AppTheme.primaryColor,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildProductItemFromAPI(BuildContext context, GetDataSellsEntitie item) {
-    final theme = Theme.of(context);
-    
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Placeholder para la imagen
-          Container(
-            width: 80,
-            height: 80,
-            decoration: BoxDecoration(
-              color: Colors.grey.shade300,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Center(
-              child: Icon(Icons.medication, color: Colors.grey.shade700, size: 40),
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  item.descripcion ?? 'Sin descripción',
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  '\$${(item.precio ?? 0).toStringAsFixed(2)}',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: AppTheme.primaryColor,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Cantidad: ${item.cantidad ?? 0}',
-                      style: AppTheme.fieldLabelStyle,
-                    ),
-                    Text(
-                      'Total: \$${(item.importe ?? 0).toStringAsFixed(2)}',
-                      style: AppTheme.fieldValueStyle,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'SKU: ${item.numParte ?? 'N/A'}',
-                  style: AppTheme.fieldLabelStyle,
-                ),
-              ],
-            ),
-          ),
-        ],
       ),
     );
   }

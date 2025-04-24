@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:BCG_Store/common/constants/constants.dart';
+import 'package:BCG_Store/common/errors/api_errors.dart';
 import 'package:BCG_Store/features/users/data/models/change_passeord_model.dart';
 import 'package:BCG_Store/features/users/data/models/login_response.dart';
 import 'package:BCG_Store/features/users/data/models/register_model.dart';
@@ -13,6 +14,7 @@ abstract class UserLocalDataSources {
   Future<LoginResponse> loginUser(String username, String password, [String? base_datos]);
   Future<void> changePassword(ChangePasswordEntitie change_password_entiti, String token);
   Future<void> recoveryPassword(String email);
+  Future<void> updatetoken( String token, String? token_device);
 
   
 }
@@ -226,6 +228,41 @@ Future<void> recoveryPassword(String email) async {
     throw Exception('$e');
   }
 }
+
+  @override
+  Future<void> updatetoken(String token, String? token_device) async {
+    try {
+      final response = await http.put(
+        Uri.parse('$defaultApiServer/users/update-token-device/'), 
+        headers: {
+          'Content-Type': 'application/json',
+                  'Authorization': 'Bearer $token',
+
+        },
+        body: jsonEncode({
+          'token_device': token_device, 
+        }),
+      );
+
+      print('update-token-device: $defaultApiServer/users/update-token-device/');
+      print('update-token-device Response status: ${response.statusCode}');
+      print('update-token-device Response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        print('Token de dispositivo actualizado exitosamente');
+      } else {
+        ApiExceptionCustom exception = ApiExceptionCustom(
+          response: response,
+        );
+        exception.validateMesage();
+        throw exception;
+      }
+    } catch (e) {
+      String errorMessage = convertMessageException(error: e);
+      print('Error detallado: $errorMessage');
+      throw ApiExceptionCustom(message: errorMessage);
+    }
+  }
   
    
 }

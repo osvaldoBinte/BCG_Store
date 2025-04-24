@@ -1,10 +1,11 @@
 import 'package:BCG_Store/common/theme/App_Theme.dart';
 import 'package:BCG_Store/features/clients/domain/entities/client_data_entitie.dart';
 import 'package:BCG_Store/features/clients/domain/usecases/client_data_usecase.dart';
-import 'package:BCG_Store/features/rewards/presentation/points/custom_loading_screen.dart';
+import 'package:BCG_Store/features/clients/presentation/profile/custom_loading_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter/services.dart';
+import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'qr_loading_widget.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
@@ -123,141 +124,216 @@ Future<void> forceReload() async {
     }
   }
 
-  // Método para descargar y guardar la imagen QR
   Future<void> downloadQR(BuildContext context) async {
-    if (clientData.value?.url_qr == null || clientData.value!.url_qr!.isEmpty) {
-      Get.snackbar(
-        'Error', 
-        'No hay un código QR disponible para descargar',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
-      return;
-    }
+  if (clientData.value?.url_qr == null || clientData.value!.url_qr!.isEmpty) {
+    Get.snackbar(
+      'Error', 
+      'No hay un código QR disponible para descargar',
+      snackPosition: SnackPosition.BOTTOM,
+      backgroundColor: Colors.red,
+      colorText: Colors.white,
+    );
+    return;
+  }
 
-    try {
-      isDownloading.value = true;
+  try {
+    isDownloading.value = true;
+    
+    // Verificar permisos según la plataforma
+    if (Platform.isAndroid) {
+       bool permissionGranted = false;
       
-      // Verificar permisos en Android
-      if (Platform.isAndroid) {
-        bool permissionGranted = false;
+      try {
+        final androidInfo = await _deviceInfo.androidInfo;
+        final sdkVersion = androidInfo.version.sdkInt;
         
-        try {
-          // Obtenemos la versión de Android
-          final androidInfo = await _deviceInfo.androidInfo;
-          final sdkVersion = androidInfo.version.sdkInt;
-          
-          if (sdkVersion >= 33) { // Android 13+
-            var photos = await Permission.photos.status;
-            if (photos.isGranted) {
-              permissionGranted = true;
-            } else {
-              var requestStatus = await Permission.photos.request();
-              permissionGranted = requestStatus.isGranted;
-            }
+        if (sdkVersion >= 33) { // Android 13+
+          var photos = await Permission.photos.status;
+          if (photos.isGranted) {
+            permissionGranted = true;
           } else {
-            // Para versiones anteriores de Android
-            var storage = await Permission.storage.status;
-            if (storage.isGranted) {
-              permissionGranted = true;
-            } else {
-              var requestStatus = await Permission.storage.request();
-              permissionGranted = requestStatus.isGranted;
-            }
+            var requestStatus = await Permission.photos.request();
+            permissionGranted = requestStatus.isGranted;
+          }
+        } else {
+          var storage = await Permission.storage.status;
+          if (storage.isGranted) {
+            permissionGranted = true;
+          } else {
+            var requestStatus = await Permission.storage.request();
+            permissionGranted = requestStatus.isGranted;
+          }
+        }
+      } catch (e) {
+        print('Error al verificar permisos: $e');
+        var storage = await Permission.storage.request();
+        permissionGranted = storage.isGranted;
+      }
+      
+      if (!permissionGranted) {
+        isDownloading.value = false;
+        Get.snackbar(
+          'Permiso denegado', 
+          'Se requiere permiso para guardar la imagen',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.orange,
+          colorText: Colors.white,
+        );
+        return;
+      }
+    } else if (Platform.isIOS) {
+      // Para iOS, verificar permiso de PhotoLibrary
+      var photos = await Permission.photos.status;
+      print('Estado de permiso fotos iOS: $photos');
+      
+      if (photos.isDenied || photos.isPermanentlyDenied) {
+        // Si está denegado, solicitar mediante nuestro canal personalizado
+        const platform = MethodChannel('com.bgcstore.photoPermission');
+        try {
+          final bool result = await platform.invokeMethod('requestPhotoAccess');
+          if (!result) {
+            isDownloading.value = false;
+            Get.snackbar(
+              'Permiso denegado', 
+              'Se requiere acceso a la galería para guardar la imagen',
+              snackPosition: SnackPosition.BOTTOM,
+              backgroundColor: Colors.orange,
+              colorText: Colors.white,
+              mainButton: TextButton(
+                onPressed: () {
+                  openAppSettings();
+                },
+                child: Text('ABRIR AJUSTES', style: TextStyle(color: Colors.white)),
+              ),
+            );
+            return;
           }
         } catch (e) {
-          print('Error al verificar permisos: $e');
-          // Intentamos solicitar el permiso de almacenamiento por si acaso
-          var storage = await Permission.storage.request();
-          permissionGranted = storage.isGranted;
-        }
-        
-        if (!permissionGranted) {
+          print('Error al solicitar permiso con canal: $e');
           isDownloading.value = false;
           Get.snackbar(
-            'Permiso denegado', 
-            'Se requiere permiso para guardar la imagen',
+            'Error de permiso', 
+            'No se pudo solicitar permiso para la galería',
             snackPosition: SnackPosition.BOTTOM,
-            backgroundColor: Colors.orange,
+            backgroundColor: Colors.red,
             colorText: Colors.white,
           );
           return;
         }
       }
+    }
 
-      // Obtener directorio de descargas para Android o documentos para iOS
-      final String fileName = "QR_ID_${DateTime.now().millisecondsSinceEpoch}.png";
+    // Primero descargamos la imagen a un archivo temporal
+    final tempDir = await getTemporaryDirectory();
+    final fileName = "QR_ID_${DateTime.now().millisecondsSinceEpoch}.png";
+    final tempFile = File('${tempDir.path}/$fileName');
+    
+    try {
+      // Intentar descargar con Dio
+      await _dio.download(
+        clientData.value!.url_qr!,
+        tempFile.path,
+        onReceiveProgress: (received, total) {
+          if (total != -1) {
+            print('${(received / total * 100).toStringAsFixed(0)}%');
+          }
+        }
+      );
+    } catch (dioError) {
+      print('Error Dio al descargar: $dioError');
+      // Intentar con http como alternativa
+      final response = await http.get(Uri.parse(clientData.value!.url_qr!));
+      if (response.statusCode == 200) {
+        await tempFile.writeAsBytes(response.bodyBytes);
+      } else {
+        throw Exception('Error HTTP: ${response.statusCode}');
+      }
+    }
+    
+    // Ahora guardar en la galería según la plataforma
+    if (Platform.isIOS) {
+      // Para iOS, usamos image_gallery_saver
+      // Añade image_gallery_saver: ^2.0.3 a tus dependencias
+      try {
+        // Importar el paquete en la parte superior del archivo
+        // import 'package:image_gallery_saver/image_gallery_saver.dart';
+        
+        // Leer el archivo como bytes
+        final bytes = await tempFile.readAsBytes();
+        
+        // Guardar en la galería
+        final result = await ImageGallerySaver.saveImage(
+          bytes,
+          quality: 100,
+          name: fileName
+        );
+        
+        print('Resultado de guardar en galería iOS: $result');
+        
+        if (result['isSuccess'] == true) {
+          Get.snackbar(
+            'Guardado', 
+            'Código QR guardado en tu galería de fotos',
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.green,
+            colorText: Colors.white,
+            duration: Duration(seconds: 5),
+            mainButton: TextButton(
+              onPressed: () {
+                Share.shareXFiles([XFile(tempFile.path)], text: 'Mi código QR ID');
+              },
+              child: Text('COMPARTIR', style: TextStyle(color: Colors.white)),
+            ),
+          );
+        } else {
+          throw Exception('No se pudo guardar en la galería: ${result['errorMessage']}');
+        }
+      } catch (e) {
+        print('Error al guardar en galería iOS: $e');
+        throw Exception('Error al guardar en la galería de iOS: $e');
+      }
+    } else if (Platform.isAndroid) {
+      // Para Android, el archivo ya está guardado en la ruta de descargas
       String? savePath;
       
       try {
-        if (Platform.isAndroid) {
-          // Intentamos obtener el directorio de descargas
-          Directory? directory;
-          
+        // Intentamos obtener el directorio de descargas
+        Directory? directory;
+        
+        try {
+          directory = Directory('/storage/emulated/0/Download');
+          if (!await directory.exists()) {
+            throw Exception('Download directory does not exist');
+          }
+        } catch (e) {
+          print('Error con directorio de descargas estándar: $e');
           try {
-            // Primero intentamos el directorio de descargas estándar
-            directory = Directory('/storage/emulated/0/Download');
-            if (!await directory.exists()) {
-              throw Exception('Download directory does not exist');
+            directory = await getExternalStorageDirectory();
+            if (directory == null) {
+              throw Exception('External storage directory is null');
             }
           } catch (e) {
-            print('Error con directorio de descargas estándar: $e');
-            try {
-              // Luego intentamos obtener directorio desde path_provider
-              directory = await getExternalStorageDirectory();
-              if (directory == null) {
-                throw Exception('External storage directory is null');
-              }
-            } catch (e) {
-              print('Error con getExternalStorageDirectory: $e');
-              // Como último recurso, usamos el directorio de caché
-              directory = await getTemporaryDirectory();
-            }
+            print('Error con getExternalStorageDirectory: $e');
+            directory = await getTemporaryDirectory();
           }
-          
-          savePath = "${directory.path}/$fileName";
-        } else if (Platform.isIOS) {
-          final directory = await getApplicationDocumentsDirectory();
-          savePath = "${directory.path}/$fileName";
-        } else {
-          // Para otras plataformas
-          final directory = await getTemporaryDirectory();
-          savePath = "${directory.path}/$fileName";
         }
-      } catch (e) {
-        print('Error al obtener directorio: $e');
-        // Si todo falla, usamos el directorio temporal
-        final directory = await getTemporaryDirectory();
+        
         savePath = "${directory.path}/$fileName";
-      }
-      
-      if (savePath == null) {
-        throw Exception('No se pudo determinar una ruta para guardar el archivo');
-      }
-      
-      print('Ruta de guardado: $savePath');
-      
-      // Descargar el archivo usando Dio
-      try {
-        await _dio.download(
-          clientData.value!.url_qr!,
-          savePath,
-          onReceiveProgress: (received, total) {
-            if (total != -1) {
-              print('${(received / total * 100).toStringAsFixed(0)}%');
-            }
-          }
-        );
         
-        print('Archivo descargado correctamente a: $savePath');
+        // Copiar el archivo temporal al directorio de descargas
+        await tempFile.copy(savePath);
         
-        // Mostrar el mensaje de éxito
+        // Notificar a la galería sobre el nuevo archivo (opcional)
+        try {
+          // Usar MediaScanner para actualizar la galería
+          await _scanFile(savePath);
+        } catch (scanError) {
+          print('Error al escanear archivo (no crítico): $scanError');
+        }
+        
         Get.snackbar(
           'Descargado', 
-          Platform.isAndroid 
-            ? 'Código QR guardado en la galería' 
-            : 'Código QR guardado en Documentos',
+          'Código QR guardado en tu galería',
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.green,
           colorText: Colors.white,
@@ -270,51 +346,34 @@ Future<void> forceReload() async {
           ),
         );
       } catch (e) {
-        print('Error durante la descarga con Dio: $e');
-        // Intentamos con http como alternativa
-        try {
-          final response = await http.get(Uri.parse(clientData.value!.url_qr!));
-          if (response.statusCode == 200) {
-            final file = File(savePath);
-            await file.writeAsBytes(response.bodyBytes);
-            
-            Get.snackbar(
-              'Descargado', 
-              'Código QR guardado correctamente',
-              snackPosition: SnackPosition.BOTTOM,
-              backgroundColor: Colors.green,
-              colorText: Colors.white,
-              duration: Duration(seconds: 5),
-              mainButton: TextButton(
-                onPressed: () {
-                  Share.shareXFiles([XFile(savePath!)], text: 'Mi código QR ID');
-                },
-                child: Text('COMPARTIR', style: TextStyle(color: Colors.white)),
-              ),
-            );
-          } else {
-            throw Exception('HTTP Status: ${response.statusCode}');
-          }
-        } catch (httpError) {
-          print('Error con HTTP alternativo: $httpError');
-          throw Exception('Falló la descarga con método alternativo: $httpError');
-        }
+        print('Error al guardar en Android: $e');
+        throw Exception('Error al guardar en Android: $e');
       }
-    } catch (e) {
-      print('Error final en downloadQR: $e');
-      isDownloading.value = false;
-      Get.snackbar(
-        'Error', 
-        'No se pudo descargar el QR: ${e.toString()}',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
-    } finally {
-      isDownloading.value = false;
     }
+  } catch (e) {
+    print('Error final en downloadQR: $e');
+    isDownloading.value = false;
+    Get.snackbar(
+      'Error', 
+      'No se pudo descargar el QR: ${e.toString()}',
+      snackPosition: SnackPosition.BOTTOM,
+      backgroundColor: Colors.red,
+      colorText: Colors.white,
+    );
+  } finally {
+    isDownloading.value = false;
   }
-
+}
+Future<void> _scanFile(String path) async {
+  try {
+    if (Platform.isAndroid) {
+      const platform = MethodChannel('com.bgcstore.mediaScanner');
+      await platform.invokeMethod('scanFile', {'path': path});
+    }
+  } catch (e) {
+    print('Error al escanear archivo: $e');
+  }
+}
   // Método para compartir el QR
   Future<void> shareQR(BuildContext context) async {
     if (clientData.value?.url_qr == null || clientData.value!.url_qr!.isEmpty) {
@@ -676,22 +735,14 @@ void showQRModal(BuildContext context) async {
                                         }),
                                         
                                         const SizedBox(height: 24),
-                                        
-                                        // Botón para cerrar el modal
-                                        ElevatedButton(
-                                          onPressed: () {
+                                         _buildActionButton(
+                                                      icon: Icons.download,
+                                                      label: 'Cerrar',
+                                                      isLoading: isDownloading.value,
+ onPressed: () {
                                             Navigator.pop(context);
-                                          },
-                                          style: ElevatedButton.styleFrom(
-                                            backgroundColor: AppTheme.primaryColor,
-                                            foregroundColor: AppTheme.secondaryColor,
-                                            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.circular(8),
-                                            ),
-                                          ),
-                                          child: const Text('Cerrar'),
-                                        ),
+                                          },                                                    ),
+                                        
                                       ],
                                     ),
                                   ),
@@ -736,16 +787,7 @@ void showQRModal(BuildContext context) async {
           borderRadius: BorderRadius.circular(8),
         ),
       ),
-      icon: isLoading 
-        ? SizedBox(
-            width: 16,
-            height: 16,
-            child: CircularProgressIndicator(
-              color: AppTheme.secondaryColor,
-              strokeWidth: 2,
-            ),
-          )
-        : Icon(icon, size: 16),
+      
       label: Text(label),
     );
   }

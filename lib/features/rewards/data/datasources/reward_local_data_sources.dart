@@ -22,9 +22,8 @@ class RewardLocalDataSourcesImpl implements RewardLocalDataSources {
   String defaultApiServer = AppConstants.serverBase;
   
   @override
-  Future<List<CheckPointsEntitie>> getRewards(String token,String id_cliente) async {
+Future<List<CheckPointsEntitie>> getRewards(String token, String id_cliente) async {
   try {
-
     final response = await http.get(
       Uri.parse('$defaultApiServer/check_points/$id_cliente'),
       headers: {
@@ -39,22 +38,87 @@ class RewardLocalDataSourcesImpl implements RewardLocalDataSources {
       print('⭐ Respuesta exitosa');
       print('⭐ Cuerpo de respuesta: ${response.body}');
       
-      final List<dynamic> jsonData = json.decode(response.body);
-      print('⭐ Número de elementos recibidos: ${jsonData.length}');
+      // Decodificar la respuesta como un Map en lugar de una List
+      final Map<String, dynamic> responseData = json.decode(response.body);
       
-      final List<CheckPointsEntitie> results = [];
-      for (var item in jsonData) {
-        print('⭐ Procesando item: $item');
-        try {
-          final model = CheckPointModel.fromJson(item);
-          print('⭐ Item procesado exitosamente: ${model.folio_venta}');
-          results.add(model);
-        } catch (e) {
-          print('❌ Error procesando item: $e');
+      List<CheckPointsEntitie> results = [];
+      
+      // Procesar puntos ganados
+      if (responseData.containsKey('puntos_ganados')) {
+        print('⭐ Procesando puntos ganados');
+        final List<dynamic> puntosGanadosJson = responseData['puntos_ganados'];
+        print('⭐ Número de puntos ganados: ${puntosGanadosJson.length}');
+        
+        for (var item in puntosGanadosJson) {
+          try {
+            // Crear un modelo a partir de los datos de Ventas_Fidelizacion
+            final model = CheckPointModel(
+              folio_venta: item['folio_venta'] ?? '',
+              puntos_ganados: (item['monedero'] ?? 0).toDouble(),
+              fecha_puntos_ganados: item['fecha'] ?? '',
+              puntos_usados: 0,
+              fecha_puntos_usados: null,
+              saldo_puntos: (item['monedero'] ?? 0).toDouble(),
+              monedero: (item['monedero'] ?? 0).toDouble(),
+              minimo_c: (item['minimo_c'] ?? 0).toDouble(),
+              porcentaje: (item['porcentaje'] ?? 0).toDouble(),
+              usuario: item['usuario'] ?? '',
+              id_cliente: item['id_cliente'],
+            );
+            
+            print('⭐ Punto ganado procesado: ${model.folio_venta}, puntos: ${model.puntos_ganados}');
+            results.add(model);
+          } catch (e) {
+            print('❌ Error procesando punto ganado: $e');
+          }
         }
       }
       
+      // Procesar puntos gastados
+      if (responseData.containsKey('puntos_gastados')) {
+        print('⭐ Procesando puntos gastados');
+        final List<dynamic> puntosGastadosJson = responseData['puntos_gastados'];
+        print('⭐ Número de puntos gastados: ${puntosGastadosJson.length}');
+        
+        for (var item in puntosGastadosJson) {
+          try {
+            // Crear un modelo a partir de los datos de Ventas_ConPuntos
+            final model = CheckPointModel(
+              folio_venta: item['folio'] ?? '',
+              puntos_ganados: 0,
+              fecha_puntos_ganados: '', // No hay fecha de puntos ganados en este caso
+              puntos_usados: (item['puntos'] ?? 0).toDouble(),
+              fecha_puntos_usados: item['fec'] ?? '',
+              saldo_puntos: -(item['puntos'] ?? 0).toDouble(), // Negativo porque son puntos usados
+              usuario: item['usuario'] ?? '',
+              importe: (item['importe'] ?? 0).toDouble(),
+              id_cliente: item['id_cliente'],
+            );
+            
+            print('⭐ Punto gastado procesado: ${model.folio_venta}, puntos: ${model.puntos_usados}');
+            results.add(model);
+          } catch (e) {
+            print('❌ Error procesando punto gastado: $e');
+          }
+        }
+      }
+      
+      // Procesamiento del resumen si existe
+      if (responseData.containsKey('resumen')) {
+        print('⭐ Información de resumen disponible: ${responseData['resumen']}');
+        final double balanceActual = (responseData['resumen']['balance_actual'] ?? 0).toDouble();
+        print('⭐ Balance actual: $balanceActual');
+      }
+      
       print('⭐ Total de elementos procesados: ${results.length}');
+      
+      // Ordenamos los resultados por fecha (más reciente primero)
+      results.sort((a, b) {
+        DateTime dateA = _parseDate(a.puntos_ganados > 0 ? a.fecha_puntos_ganados : (a.fecha_puntos_usados ?? ''));
+        DateTime dateB = _parseDate(b.puntos_ganados > 0 ? b.fecha_puntos_ganados : (b.fecha_puntos_usados ?? ''));
+        return dateB.compareTo(dateA);
+      });
+      
       return results;
     } else {
       print('❌ Error en la respuesta: ${response.statusCode}');
@@ -89,6 +153,29 @@ class RewardLocalDataSourcesImpl implements RewardLocalDataSources {
       print('❌ Error de formato: ${e.message}');
     }
     throw Exception('Error de conexión: $e');
+  }
+}
+
+// Método auxiliar para parsear fechas
+DateTime _parseDate(String dateStr) {
+  try {
+    if (dateStr.isEmpty) return DateTime(2000); // fecha predeterminada si está vacía
+    
+    // Intentar con formato YYYY-MM-DD
+    List<String> parts = dateStr.split('-');
+    if (parts.length == 3) {
+      return DateTime(
+        int.parse(parts[0]), // año
+        int.parse(parts[1]), // mes
+        int.parse(parts[2].split(' ')[0])  // día (removiendo cualquier parte de hora)
+      );
+    }
+    
+    // Si no se pudo parsear, retornar fecha predeterminada
+    return DateTime(2000);
+  } catch (e) {
+    print('❌ Error al parsear fecha: $dateStr');
+    return DateTime(2000); // fecha predeterminada
   }
 }
 

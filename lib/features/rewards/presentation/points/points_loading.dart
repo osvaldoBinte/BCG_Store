@@ -36,7 +36,7 @@ class _PointsLoadingState extends State<PointsLoading>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[100],
-     
+      
       body: AnimatedBuilder(
         animation: _shimmerAnimation,
         builder: (context, child) {
@@ -119,20 +119,28 @@ class _PointsLoadingState extends State<PointsLoading>
   }
 
   Widget _buildPointsListSkeleton(BuildContext context) {
-    // Crear 5 tarjetas de puntos skeleton
-    return ListView.builder(
+    // Crear tarjetas esqueleto para un flujo realista de carga
+    // Simulamos tener 3 transacciones: 
+    // 1. Un punto ganado y expandido (reciente)
+    // 2. Un punto usado
+    // 3. Otro punto ganado
+    return ListView(
       padding: EdgeInsets.all(16),
-      itemCount: 5,
-      itemBuilder: (context, index) {
-        // El primer elemento es negativo (rojo), el resto positivos
-        final bool isPositive = index != 0;
+      children: [
+        // Primera tarjeta - Punto ganado - Expandida (la más reciente)
+        _buildEarnedPointCardSkeleton(isExpanded: true),
         
-        return _buildPointCardSkeleton(isPositive);
-      },
+        // Segunda tarjeta - Punto usado (no expandida)
+        _buildUsedPointCardSkeleton(isExpanded: false),
+        
+        // Tercera tarjeta - Otro punto ganado (no expandida)
+        _buildEarnedPointCardSkeleton(isExpanded: false),
+      ],
     );
   }
   
-  Widget _buildPointCardSkeleton(bool isPositive) {
+  // Tarjeta de puntos ganados
+  Widget _buildEarnedPointCardSkeleton({required bool isExpanded}) {
     return Container(
       margin: EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
@@ -153,70 +161,176 @@ class _PointsLoadingState extends State<PointsLoading>
             padding: const EdgeInsets.all(16),
             child: Row(
               children: [
-                // Icono circular
+                // Icono circular verde
                 Container(
                   width: 50,
                   height: 50,
                   decoration: BoxDecoration(
-                    color: isPositive
-                        ? Color(0xFF0D8067).withOpacity(0.1)
-                        : Colors.red.withOpacity(0.1),
+                    color: Color(0xFF0D8067).withOpacity(0.1),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
                     Icons.star,
-                    color: isPositive ? Color(0xFF0D8067).withOpacity(0.3) : Colors.red.withOpacity(0.3),
+                    color: Color(0xFF0D8067).withOpacity(0.3),
                     size: 28,
                   ),
                 ),
                 SizedBox(width: 16),
                 
-                // Texto "Puntos" (skeleton)
+                // Columna con información (skeleton)
                 Expanded(
-                  child: _buildShimmerBox(
-                    child: Container(
-                      height: 16,
-                      width: 80,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(8),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildShimmerBox(
+                        child: Container(
+                          height: 16,
+                          width: 120,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                ),
-                
-                // Cantidad de puntos (skeleton)
-                _buildShimmerBox(
-                  child: Container(
-                    height: 16,
-                    width: 70,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
+                      SizedBox(height: 4),
+                      _buildShimmerBox(
+                        child: Container(
+                          height: 14,
+                          width: 100,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 4),
+                      _buildShimmerBox(
+                        child: Container(
+                          height: 12,
+                          width: 80,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 
                 // Icono de flecha
-                SizedBox(width: 8),
                 Icon(
-                  isPositive ? Icons.arrow_upward : Icons.arrow_downward,
-                  color: isPositive 
-                    ? Color(0xFF0D8067).withOpacity(0.3) 
-                    : Colors.red.withOpacity(0.3),
+                  Icons.keyboard_arrow_down,
+                  color: Colors.grey.withOpacity(0.3),
                 ),
               ],
             ),
           ),
           
-          // Solo el primer elemento tiene la parte expandida visible
-          isPositive ? SizedBox.shrink() : _buildExpandedDetailsSkeleton(),
+          // Detalles expandidos (solo si isExpanded es true)
+          if (isExpanded) _buildEarnedDetailsSkeleton(),
         ],
       ),
     );
   }
   
-  Widget _buildExpandedDetailsSkeleton() {
+  // Tarjeta de puntos usados
+  Widget _buildUsedPointCardSkeleton({required bool isExpanded}) {
+    return Container(
+      margin: EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          // Parte superior - siempre visible
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                // Icono circular rojo
+                Container(
+                  width: 50,
+                  height: 50,
+                  decoration: BoxDecoration(
+                    color: Colors.red.withOpacity(0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.star,
+                    color: Colors.red.withOpacity(0.3),
+                    size: 28,
+                  ),
+                ),
+                SizedBox(width: 16),
+                
+                // Columna con información (skeleton)
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildShimmerBox(
+                        child: Container(
+                          height: 16,
+                          width: 120,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 4),
+                      _buildShimmerBox(
+                        child: Container(
+                          height: 14,
+                          width: 100,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 4),
+                      _buildShimmerBox(
+                        child: Container(
+                          height: 12,
+                          width: 80,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                
+                // Icono de flecha
+                Icon(
+                  Icons.keyboard_arrow_down,
+                  color: Colors.grey.withOpacity(0.3),
+                ),
+              ],
+            ),
+          ),
+          
+          // Detalles expandidos (solo si isExpanded es true)
+          if (isExpanded) _buildUsedDetailsSkeleton(),
+        ],
+      ),
+    );
+  }
+  
+  // Detalles expandidos para puntos ganados
+  Widget _buildEarnedDetailsSkeleton() {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(16),
@@ -228,12 +342,82 @@ class _PointsLoadingState extends State<PointsLoading>
         ),
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Título
+          _buildShimmerBox(
+            child: Container(
+              height: 15,
+              width: 150,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(6),
+              ),
+            ),
+          ),
+          SizedBox(height: 12),
+          
+          // Fecha
           _buildDetailRowSkeleton(),
           SizedBox(height: 8),
+          
+          // Folio de venta (en contenedor)
+          Container(
+            margin: EdgeInsets.only(top: 8),
+            padding: EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.grey.shade100,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: _buildDetailRowSkeleton(),
+          ),
+        ],
+      ),
+    );
+  }
+  
+  // Detalles expandidos para puntos usados
+  Widget _buildUsedDetailsSkeleton() {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade50,
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(16),
+          bottomRight: Radius.circular(16),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Título
+          _buildShimmerBox(
+            child: Container(
+              height: 15,
+              width: 150,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(6),
+              ),
+            ),
+          ),
+          SizedBox(height: 12),
+          
+          // Fecha
           _buildDetailRowSkeleton(),
           SizedBox(height: 8),
-          _buildDetailRowSkeleton(),
+          
+          // Folio de venta (en contenedor)
+          Container(
+            margin: EdgeInsets.only(top: 8),
+            padding: EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.grey.shade100,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: _buildDetailRowSkeleton(),
+          ),
         ],
       ),
     );

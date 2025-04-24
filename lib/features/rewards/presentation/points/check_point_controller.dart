@@ -2,6 +2,7 @@ import 'package:BCG_Store/features/rewards/domain/entities/check_points_entitie.
 import 'package:BCG_Store/features/rewards/domain/usecases/check_point_usecase.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
 class CheckPointController extends GetxController {
   final CheckPointUsecase checkPointUsecase;
 
@@ -150,16 +151,14 @@ class CheckPointController extends GetxController {
 
   void _calculateTotalPoints() {
     totalPoints.value = checkPoints.fold(
-      0, (sum, checkPoint) => sum + checkPoint.monedero);
+      0, (sum, checkPoint) => sum + checkPoint.saldo_puntos);
     print('💰 Total de puntos: ${totalPoints.value}');
   }
 
-  // Helper method to format points as string
   String formatPoints(double points) {
     return points.toStringAsFixed(0);
   }
 
-  // Helper method to get formatted total points
   String get formattedTotalPoints {
     return formatPoints(totalPoints.value);
   }

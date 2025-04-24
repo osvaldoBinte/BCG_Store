@@ -7,17 +7,13 @@ import 'package:BCG_Store/features/users/presentation/login/login_controller.dar
 import 'package:BCG_Store/features/users/presentation/login/qr_scanner_widget.dart';
 import 'package:get/get.dart';
 import 'package:BCG_Store/common/theme/App_Theme.dart';
-
 class LoginScreen extends StatelessWidget {
   LoginScreen({Key? key}) : super(key: key);
-
   final LoginController controller = Get.find<LoginController>();
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final screenSize = MediaQuery.of(context).size;
-
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(0),
@@ -30,56 +26,59 @@ class LoginScreen extends StatelessWidget {
         child: Column(
           children: [
             // Contenedor superior con animación
-            GetX<LoginController>(
-              builder: (_) {
-                return AnimatedContainer(
-                  duration: const Duration(milliseconds: 300),
-                  curve: Curves.easeInOut,
-                  height: (controller.isLoginForm.value || 
-                          controller.isRegisterForm.value || 
-                          controller.isQrScannerVisible.value ||
-                          controller.isRecoveryForm.value ||
-                          controller.isTempPasswordForm.value ||
-                          controller.isChangePasswordForm.value)
-                    ? screenSize.height * 0.25  // Reducido para evitar overflow
-                    : screenSize.height * 0.35,
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: AppTheme.primaryColor,
-                    borderRadius: const BorderRadius.only(
-                      bottomLeft: Radius.circular(30),
-                      bottomRight: Radius.circular(30),
-                    ),
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                    Obx(() {
-  final url = ThemeService.to.logoUrl.value.isNotEmpty
-      ? ThemeService.to.logoUrl.value
-      : AppTheme.defaultLogoAsset;
-      
-  print('Mostrando logo URL: $url');
-  
-  return  Padding(
-  padding: const EdgeInsets.only(bottom: 24.0),
-  child: Center(
-    child: RoundedLogoWidget(
-      height: 160,
-      width: MediaQuery.of(context).size.width * 0.7, // Limita el ancho al 70% del ancho de la pantalla
-      borderRadius: 8.0,
-      fit: BoxFit.contain, // Asegura que la imagen se ajuste dentro del contenedor
-    ),
-  ),
-);
-}),
-                      const SizedBox(height: 20),
-                      
-                    ],
-                  ),
-                );
-              }
-            ),
+           // En tu LoginScreen
+GetX<LoginController>(
+  builder: (_) {
+    // Calcular la altura del contenedor basado en el estado actual
+    final containerHeight = (controller.isLoginForm.value || 
+              controller.isRegisterForm.value || 
+              controller.isQrScannerVisible.value ||
+              controller.isRecoveryForm.value ||
+              controller.isTempPasswordForm.value ||
+              controller.isChangePasswordForm.value)
+        ? screenSize.height * 0.25  
+        : screenSize.height * 0.35;
+        
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+      height: containerHeight,
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: AppTheme.primaryColor,
+        borderRadius: const BorderRadius.only(
+          bottomLeft: Radius.circular(30),
+          bottomRight: Radius.circular(30),
+        ),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Obx(() {
+            final url = ThemeService.to.logoUrl.value.isNotEmpty
+                ? ThemeService.to.logoUrl.value
+                : AppTheme.defaultLogoAsset;
+                
+            // Calcular el tamaño del logo como un porcentaje de la altura del contenedor
+            final logoHeight = containerHeight * 0.6; // 60% de la altura del contenedor
+                
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 16.0),
+              child: Center(
+                child: RoundedLogoWidget(
+                  height: logoHeight,
+                  width: screenSize.width * 0.6,
+                  borderRadius: 8.0,
+                  fit: BoxFit.contain, 
+                ),
+              ),
+            );
+          }),
+        ],
+      ),
+    );
+  }
+),
             
             // Contenido inferior
             Expanded(
@@ -114,7 +113,6 @@ class LoginScreen extends StatelessWidget {
       ),
     );
   }
-
   Widget _buildLoginForm(ThemeData theme) {
     return Column(
       key: const ValueKey('login_form'),
@@ -232,7 +230,6 @@ class LoginScreen extends StatelessWidget {
       ],
     );
   }
-
   Widget _buildRecoveryForm(ThemeData theme) {
     return Column(
       key: const ValueKey('recovery_form'),
@@ -305,7 +302,6 @@ class LoginScreen extends StatelessWidget {
       ],
     );
   }
-
   Widget _buildTempPasswordForm(ThemeData theme) {
     return Column(
       key: const ValueKey('temp_password_form'),
@@ -388,7 +384,6 @@ class LoginScreen extends StatelessWidget {
       ],
     );
   }
-
   Widget _buildChangePasswordForm(ThemeData theme) {
     return Column(
       key: const ValueKey('change_password_form'),
@@ -517,7 +512,6 @@ class LoginScreen extends StatelessWidget {
       ],
     );
   }
-
   Widget _buildRegisterForm(ThemeData theme) {
     return Column(
       key: const ValueKey('register_form'),
@@ -663,7 +657,6 @@ class LoginScreen extends StatelessWidget {
       ],
     );
   }
-
   Widget _buildClientInfoCard(ThemeData theme) {
     final clientData = controller.qrClientData.value;
     
@@ -677,7 +670,6 @@ class LoginScreen extends StatelessWidget {
       
     );
   }
-
   Widget _buildInfoRow(String label, String value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0),
@@ -702,7 +694,6 @@ class LoginScreen extends StatelessWidget {
       ),
     );
   }
-
   Widget _buildInitialContent(ThemeData theme) {
     return Column(
       key: const ValueKey('initial_content'),

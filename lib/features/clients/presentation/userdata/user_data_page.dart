@@ -1,6 +1,7 @@
 import 'package:BCG_Store/common/routes/navigation_service.dart';
 import 'package:BCG_Store/common/services/auth_service.dart';
 import 'package:BCG_Store/common/theme/App_Theme.dart';
+import 'package:BCG_Store/common/widgets/privacy_notices.dart';
 import 'package:BCG_Store/features/clients/presentation/userdata/user_data_Loading.dart';
 import 'package:BCG_Store/features/clients/presentation/userdata/user_data_controller.dart';
 import 'package:BCG_Store/page/widgets/custom_alert_type.dart';
@@ -261,7 +262,7 @@ class UserDataPage extends StatelessWidget {
             ),
           ),
           child: Text(
-            "Información de Usuario",
+            "Información de Empresa ",
             style: TextStyle(
               color: AppTheme.primaryColor,
               fontSize: 16,
@@ -339,6 +340,8 @@ class UserDataPage extends StatelessWidget {
                     title: "Aviso de Privacidad",
                     subtitle: "Detalles de nuestras políticas y condiciones",
                     onTap: () {
+                          showPrivacyPolicyModal(context); // Llama a la nueva función simplificada
+
                     },
                   ),
                   
@@ -360,7 +363,69 @@ class UserDataPage extends StatelessWidget {
       ),
     );
   }
+ void showPrivacyPolicyModal(BuildContext context) {
+  final screenHeight = MediaQuery.of(context).size.height;
+  final screenWidth = MediaQuery.of(context).size.width;
   
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: Colors.transparent,
+    builder: (context) {
+      return DraggableScrollableSheet(
+        initialChildSize: 0.85,
+        minChildSize: 0.5, 
+        maxChildSize: 0.85, 
+        expand: false,
+        builder: (context, scrollController) {
+          return Container(
+            decoration: BoxDecoration(
+              color: AppTheme.backgroundGrey,
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(20),
+                topRight: Radius.circular(20),
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: AppTheme.dividerColor.withOpacity(0.1),
+                  spreadRadius: 1,
+                  blurRadius: 10,
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Barra indicadora
+                Container(
+                  margin: const EdgeInsets.only(top: 12, bottom: 8),
+                  width: 60,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: AppTheme.primaryColor,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                
+                Divider(
+                  height: 1,
+                  thickness: 1,
+                  color: AppTheme.dividerColor.withOpacity(0.3),
+                ),
+                
+                // Contenido con ScrollController
+                Expanded(
+                  child: PrivacyPolicyView(scrollController: scrollController),
+                ),
+              ],
+            ),
+          );
+        },
+      );
+    },
+  );
+}
+
   Widget _buildActionButton({
     required IconData icon,
     required String label,

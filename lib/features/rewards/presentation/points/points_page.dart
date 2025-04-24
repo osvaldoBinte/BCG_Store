@@ -1,8 +1,11 @@
 import 'package:BCG_Store/common/routes/navigation_service.dart';
 import 'package:BCG_Store/common/theme/App_Theme.dart';
 import 'package:BCG_Store/features/rewards/domain/entities/check_points_entitie.dart';
+import 'package:BCG_Store/features/rewards/presentation/points/EarnedPointCard.dart';
 import 'package:BCG_Store/features/rewards/presentation/points/check_point_controller.dart';
 import 'package:BCG_Store/features/rewards/presentation/points/points_loading.dart';
+import 'package:BCG_Store/features/rewards/presentation/points/widget/expansion_controller.dart';
+import 'package:BCG_Store/features/rewards/presentation/points/widget/point_card.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -50,10 +53,67 @@ class PointsScreen extends GetView<CheckPointController> {
   }
 
   Widget _buildContentView(BuildContext context) {
+    List<PointTransaction> allTransactions = [];
+    
+    // Crear transacciones combinadas de ambas fuentes
+    for (var checkPoint in controller.checkPoints) {
+      // Si tiene puntos ganados, agregar transacción de ganancia
+      if (checkPoint.puntos_ganados > 0) {
+        allTransactions.add(PointTransaction(
+          checkPoint: checkPoint,
+          isEarning: true,
+          transactionDate: checkPoint.fecha_puntos_ganados,
+        ));
+      }
+      
+      // Si tiene puntos usados, agregar transacción de gasto
+      if (checkPoint.puntos_usados > 0 && checkPoint.fecha_puntos_usados != null) {
+        allTransactions.add(PointTransaction(
+          checkPoint: checkPoint,
+          isEarning: false,
+          transactionDate: checkPoint.fecha_puntos_usados!,
+        ));
+      }
+    }
+    
+    // Ordenar transacciones por fecha (más reciente primero)
+    allTransactions.sort((a, b) {
+      DateTime dateA = _parseDate(a.transactionDate);
+      DateTime dateB = _parseDate(b.transactionDate);
+      return dateB.compareTo(dateA); // Orden descendente
+    });
+    
+    // Controlador de expansión para los cards
     final expansionController = Get.put(ExpansionController(
-      itemCount: controller.checkPoints.length,
-      initialExpandedIndex: 0 
+      itemCount: allTransactions.length,
+      initialExpandedIndex: allTransactions.isNotEmpty ? 0 : -1
     ));
+    
+    // Crear las tarjetas para cada transacción
+    List<Widget> cards = [];
+    for (int i = 0; i < allTransactions.length; i++) {
+      PointTransaction transaction = allTransactions[i];
+      
+      if (transaction.isEarning) {
+        cards.add(
+          EarnedPointCard(
+            checkPoint: transaction.checkPoint,
+            index: i,
+            formatPoints: controller.formatPoints,
+            expansionController: expansionController,
+          )
+        );
+      } else {
+        cards.add(
+          UsedPointCard(
+            checkPoint: transaction.checkPoint,
+            index: i,
+            formatPoints: controller.formatPoints,
+            expansionController: expansionController,
+          )
+        );
+      }
+    }
     
     return Column(
       children: [
@@ -62,10 +122,39 @@ class PointsScreen extends GetView<CheckPointController> {
         
         // Lista de puntos
         Expanded(
-          child: _buildPointsList(context, expansionController),
+          child: RefreshIndicator(
+            onRefresh: () => controller.refreshCheckPoints(),
+            color: AppTheme.primaryColor,
+            child: ListView.builder(
+              padding: EdgeInsets.all(16),
+              itemCount: cards.length,
+              itemBuilder: (context, index) {
+                return cards[index];
+              },
+            ),
+          ),
         ),
       ],
     );
+  }
+  
+  // Función auxiliar para convertir string de fecha a objeto DateTime
+  DateTime _parseDate(String dateStr) {
+    try {
+      // Intentar analizar la fecha en formato YYYY-MM-DD
+      List<String> parts = dateStr.split('-');
+      if (parts.length == 3) {
+        return DateTime(
+          int.parse(parts[0]), // año
+          int.parse(parts[1]), // mes
+          int.parse(parts[2].split(' ')[0])  // día (removiendo cualquier parte de hora)
+        );
+      }
+    } catch (e) {
+      print('Error al analizar fecha: $dateStr');
+    }
+    // Devolver una fecha antigua por defecto si hay error
+    return DateTime(2000, 1, 1);
   }
 
   Widget _buildHeaderSection() {
@@ -102,30 +191,8 @@ class PointsScreen extends GetView<CheckPointController> {
     );
   }
 
-  Widget _buildPointsList(BuildContext context, ExpansionController expansionController) {
-    return ListView.builder(
-      padding: EdgeInsets.all(16),
-      itemCount: controller.checkPoints.length,
-      itemBuilder: (context, index) {
-        final checkPoint = controller.checkPoints[index];
-        // El primer elemento es negativo (rojo), el resto positivos
-              final bool isPositive = true;
-
-        
-        return PointCard(
-          checkPoint: checkPoint,
-          isPositive: isPositive,
-          index: index,
-          formatPoints: controller.formatPoints,
-          expansionController: expansionController,
-        );
-      },
-    );
-  }
-
   Widget _buildLoadingView() {
-    return PointsLoading(
-    );
+    return PointsLoading();
   }
 
   Widget _buildErrorView() {
@@ -167,7 +234,7 @@ class PointsScreen extends GetView<CheckPointController> {
     );
   }
   
-  // Nuevo: Vista para cuando no hay puntos (resultado vacío o 404)
+  // Vista para cuando no hay puntos (resultado vacío o 404)
   Widget _buildEmptyView(BuildContext context) {
     return RefreshIndicator(
       onRefresh: () => controller.refreshCheckPoints(),
@@ -286,193 +353,6 @@ class PointsScreen extends GetView<CheckPointController> {
           ),
         ),
       ),
-    );
-  }
-}
-
-class ExpansionController extends GetxController {
-  late List<RxBool> expandedItems;
-  
-  ExpansionController({
-    required int itemCount,
-    int? initialExpandedIndex,
-  }) {
-    expandedItems = List.generate(
-      itemCount,
-      (index) => (index == initialExpandedIndex).obs
-    );
-  }
-  
-  void toggleExpansion(int index) {
-    expandedItems[index].value = !expandedItems[index].value;
-  }
-  
-  bool isExpanded(int index) {
-    return expandedItems[index].value;
-  }
-}
-
-// Widget de tarjeta para cada punto
-class PointCard extends StatelessWidget {
-  final CheckPointsEntitie checkPoint;
-  final bool isPositive;
-  final int index;
-  final Function(double) formatPoints;
-  final ExpansionController expansionController;
-
-  const PointCard({
-    Key? key,
-    required this.checkPoint,
-    required this.isPositive,
-    required this.index,
-    required this.formatPoints,
-    required this.expansionController,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    final String points = formatPoints(checkPoint.monedero);
-    
-    return Container(
-      margin: EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 8,
-            offset: Offset(0, 3),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          // Parte superior - siempre visible e interactiva
-          InkWell(
-            onTap: () {
-              expansionController.toggleExpansion(index);
-            },
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  // Icono circular
-                  Container(
-                    width: 50,
-                    height: 50,
-                    decoration: BoxDecoration(
-                      color: isPositive
-                          ? Color(0xFF0D8067).withOpacity(0.1)
-                          : Colors.red.withOpacity(0.1),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      Icons.star,
-                      color: isPositive ? Color(0xFF0D8067) : Colors.red,
-                      size: 28,
-                    ),
-                  ),
-                  SizedBox(width: 16),
-                  
-                  // Texto "Puntos"
-                  Expanded(
-                    child: Text(
-                      'Puntos',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                        color: isPositive ? Color(0xFF0D8067) : Colors.red,
-                      ),
-                    ),
-                  ),
-                  
-                  // Cantidad de puntos
-                  Text(
-                    '$points pts',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                      color: AppTheme.textPrimaryColor,
-                    ),
-                  ),
-                  
-                  // Icono de flecha
-                  SizedBox(width: 8),
-                  Icon(
-                    isPositive ? Icons.arrow_upward : Icons.arrow_downward,
-                    color: isPositive ? Color(0xFF0D8067) : Colors.red,
-                  ),
-                ],
-              ),
-            ),
-          ),
-          
-          // Parte expandible - detalles
-          Obx(() => expansionController.isExpanded(index)
-            ? Container(
-                width: double.infinity,
-                padding: EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade50,
-                  borderRadius: BorderRadius.only(
-                    bottomLeft: Radius.circular(16),
-                    bottomRight: Radius.circular(16),
-                  ),
-                ),
-                child: Column(
-                  children: [
-                    _buildDetailRow(
-                      context: context,
-                      label: 'Compra',
-                      value: checkPoint.folio_venta,
-                    ),
-                    SizedBox(height: 8),
-                    _buildDetailRow(
-                      context: context,
-                      label: 'Fecha',
-                      value: checkPoint.fecha,
-                    ),
-                    SizedBox(height: 8),
-                    _buildDetailRow(
-                      context: context,
-                      label: 'Puntos Obtenidos',
-                      value: '$points pts',
-                    ),
-                  ],
-                ),
-              )
-            : SizedBox.shrink()
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDetailRow({
-    required BuildContext context,
-    required String label,
-    required String value,
-  }) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 14,
-            color: AppTheme.textSecondaryColor,
-          ),
-        ),
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-            color: AppTheme.textPrimaryColor,
-          ),
-        ),
-      ],
     );
   }
 }

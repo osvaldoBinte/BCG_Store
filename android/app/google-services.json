@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "11052043979",
+    "project_id": "bcg-store",
+    "storage_bucket": "bcg-store.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:11052043979:android:6825b64a42cfb42353954e",
+        "android_client_info": {
+          "package_name": "com.binteconsulting.bcgstore"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCwJvB4LAjmG_LOoW2Kv9cpVLqtJcvZrK8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

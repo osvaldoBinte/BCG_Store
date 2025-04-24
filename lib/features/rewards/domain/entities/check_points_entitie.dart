@@ -1,19 +1,33 @@
 class CheckPointsEntitie {
   final String folio_venta;
-  final int id_cliente;
-  final double monedero;
-  final double minimo_c;
-  final double porcentaje;
-  final String fecha;
-  final String usuario;
+  final double puntos_ganados;
+  final String fecha_puntos_ganados;
+  final double puntos_usados;
+  final String? fecha_puntos_usados;
+  final double saldo_puntos;
+  
+  // Campos adicionales que podrían venir del backend
+  final double? monedero;
+  final double? minimo_c;
+  final double? porcentaje;
+  final String? usuario;
+  
+  // Para puntos gastados
+  final double? importe;
+  final int? id_cliente;
 
   CheckPointsEntitie({
     required this.folio_venta,
-    required this.id_cliente,
-    required this.monedero,
-    required this.minimo_c,
-    required this.porcentaje,
-    required this.fecha,
-    required this.usuario,
+    required this.puntos_ganados,
+    required this.fecha_puntos_ganados,
+    required this.puntos_usados,
+    this.fecha_puntos_usados,
+    required this.saldo_puntos,
+    this.monedero,
+    this.minimo_c,
+    this.porcentaje,
+    this.usuario,
+    this.importe,
+    this.id_cliente,
   });
 }

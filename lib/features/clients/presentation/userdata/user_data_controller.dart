@@ -96,22 +96,58 @@ class UserDataController extends GetxController {
     return clientData.value?.celular ?? 'Sin teléfono';
   }
 
-  String getBillingAddress() {
-    final client = clientData.value;
-    if (client == null) return 'Sin dirección';
-
-    String address = '${client.domicilio} #${client.numext}';
-    if (client.numint != null && client.numint!.isNotEmpty) {
-      address += ', Int. ${client.numint}';
-    }
-    address += ', ${client.colonia}, ${client.municipio}, ${client.cp}, ${client.estado}, ${client.pais}';
-
-    return address;
+ String getBillingAddress() {
+  final client = clientData.value;
+  if (client == null) return 'Sin dirección';
+  
+  List<String> addressParts = [];
+  
+  if (client.domicilio != null && client.domicilio.isNotEmpty) {
+    addressParts.add(client.domicilio);
   }
+  
+  if (client.numext != null && client.numext.isNotEmpty) {
+    addressParts.add('#${client.numext}');
+  }
+  
+  if (client.numint != null && client.numint!.isNotEmpty) {
+    addressParts.add('Int. ${client.numint}');
+  }
+  
+  String firstPart = addressParts.join(' ');
+  
+  addressParts = [];
+  
+  if (client.colonia != null && client.colonia.isNotEmpty) {
+    addressParts.add(client.colonia);
+  }
+  
+  if (client.municipio != null && client.municipio.isNotEmpty) {
+    addressParts.add(client.municipio);
+  }
+  
+  if (client.cp != null && client.cp.isNotEmpty) {
+    addressParts.add(client.cp);
+  }
+  
+  if (client.estado != null && client.estado.isNotEmpty) {
+    addressParts.add(client.estado);
+  }
+  
+  if (client.pais != null && client.pais.isNotEmpty) {
+    addressParts.add(client.pais);
+  }
+  
+  String secondPart = addressParts.join(', ');
+  
+  if (firstPart.isNotEmpty && secondPart.isNotEmpty) {
+    return '$firstPart, $secondPart';
+  } else {
+    return firstPart + secondPart;
+  }
+}
 
   String getDeliveryAddress() {
-    // Por ahora, usamos la misma dirección de facturación
-    // Esto podría extenderse para manejar múltiples direcciones
     return getBillingAddress();
   }
 

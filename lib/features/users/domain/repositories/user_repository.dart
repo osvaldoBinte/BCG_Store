@@ -8,4 +8,5 @@ abstract class UserRepository {
   Future<LoginResponse> loginUser(String username, String password, [String? base_datos]);
   Future changePassword(ChangePasswordEntitie change_password_entitie);
   Future<void> recoveryPassword(String email);
+  Future<void> updatetoken(String? token_device);
 }

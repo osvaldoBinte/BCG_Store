@@ -4,6 +4,7 @@ class RegisterEntitie {
   final String password;
   final String first_name;
   final String last_name;
+  final String? token_device;
 
   RegisterEntitie({
     required this.first_name, 
@@ -11,5 +12,6 @@ class RegisterEntitie {
     required this.id_cliente,
     required this.email,
     required this.password,
+    required this.token_device,
   });
 }

@@ -8,12 +8,14 @@ class ClientesAppRewardsModel  extends ClientesAppRewardsEntitie{
   required String first_name,
   required String last_name,
   required String email,
+  String? token_device,
   }) : super(
           id: id,
           username: username,
           first_name: first_name,
           last_name: last_name,
           email: email,
+          token_device: token_device,
         );
   
   factory ClientesAppRewardsModel.fromJson(Map<String, dynamic> json) {
@@ -23,6 +25,7 @@ class ClientesAppRewardsModel  extends ClientesAppRewardsEntitie{
       first_name: json['first_name'] ?? '',
       last_name: json['last_name'] ?? '',
       email: json['email'] ?? '',
+      token_device: json['token_device'] ?? '',
     );
   }
   factory ClientesAppRewardsModel.fromEntity(ClientesAppRewardsEntitie clientesAppRewardsEntitie) {
@@ -32,6 +35,7 @@ class ClientesAppRewardsModel  extends ClientesAppRewardsEntitie{
       first_name: clientesAppRewardsEntitie.first_name,
       last_name: clientesAppRewardsEntitie.last_name,
       email: clientesAppRewardsEntitie.email,
+      token_device: clientesAppRewardsEntitie.token_device,
     );
   }
   Map<String, dynamic> toJson() {
@@ -42,6 +46,7 @@ class ClientesAppRewardsModel  extends ClientesAppRewardsEntitie{
       'first_name': first_name,
       'last_name': last_name,
       'email': email,
+      'token_device': token_device,
     };  
   }
 }

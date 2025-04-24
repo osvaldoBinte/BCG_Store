@@ -13,7 +13,7 @@ import 'package:BCG_Store/features/users/presentation/home/home_controller.dart'
 import 'package:BCG_Store/features/users/presentation/home/home_page.dart';
 import 'package:BCG_Store/features/users/presentation/login/Login_screen.dart';
 import 'package:BCG_Store/features/rewards/presentation/points/check_point_controller.dart';
-import 'package:BCG_Store/features/rewards/presentation/points/points_screen.dart';
+import 'package:BCG_Store/features/rewards/presentation/points/points_page.dart';
 import 'package:BCG_Store/features/rewards/presentation/getDataSells/get_data_sells_controller.dart';
 import 'package:BCG_Store/features/rewards/presentation/getDataSells/get_data_sells_page.dart';
 import 'package:BCG_Store/features/clients/presentation/userdata/user_data_page.dart';
@@ -30,7 +30,7 @@ import 'package:BCG_Store/common/theme/App_Theme.dart';
 import 'package:BCG_Store/features/users/presentation/home/home_controller.dart';
 import 'package:BCG_Store/features/users/presentation/home/home_page.dart';
 import 'package:BCG_Store/features/users/presentation/login/Login_screen.dart';
-import 'package:BCG_Store/features/rewards/presentation/points/points_screen.dart';
+import 'package:BCG_Store/features/rewards/presentation/points/points_page.dart';
 import 'package:BCG_Store/features/rewards/presentation/getDataSells/get_data_sells_page.dart';
 import 'package:BCG_Store/features/clients/presentation/userdata/user_data_page.dart';
 import 'package:get/get.dart';
@@ -48,14 +48,15 @@ class MyApp extends StatelessWidget {
       initialBinding: BindingsBuilder(() {
         Get.put(NavigationService());
         Get.put(HomeController());
-        Get.put(LoginController(loginUsecase: usecaseConfig.loginUsecase!, registerUsecase: usecaseConfig.registerUsecase!, recoveryPasswordUsecase: usecaseConfig.recoveryPasswordUsecase!, changePasswordUsecase: usecaseConfig.changePasswordUsecase!,));
-        Get.put(SplashScreenController( clientDataUsecase: usecaseConfig.clientedataUsecase!,));
+        Get.put(LoginController(loginUsecase: usecaseConfig.loginUsecase!, registerUsecase: usecaseConfig.registerUsecase!, recoveryPasswordUsecase: usecaseConfig.recoveryPasswordUsecase!, changePasswordUsecase: usecaseConfig.changePasswordUsecase!, updateTokenUsecase: usecaseConfig.updateTokenUsecase!,));
+        Get.put(SplashScreenController( getClientesAppRewards: usecaseConfig.getClientesAppRewards!,));
         Get.put(UserDataController(clientDataUsecase: usecaseConfig.clientedataUsecase!, getClientesAppRewards: usecaseConfig.getClientesAppRewards!,));
         Get.put(CheckPointController(checkPointUsecase: usecaseConfig.checkPointUsecase!));
         Get.put(ProfileController(clientDataUsecase: usecaseConfig.clientedataUsecase!));
         Get.put(GetDataSellsController(getDataSellsUsecase: usecaseConfig.getDataSellsUsecase!));
         Get.put(ChangePasswordController(changePasswordUsecase: usecaseConfig.changePasswordUsecase!));
         Get.put(UpdateAccountDataController(updateAccountDataUsecase: usecaseConfig.updateAccountDataUsecase!));
+        
       }),
       
       initialRoute: RoutesNames.welcomePage, 
