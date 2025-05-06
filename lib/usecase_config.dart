@@ -11,6 +11,7 @@ import 'package:BCG_Store/features/rewards/domain/usecases/update_account_data_u
 import 'package:BCG_Store/features/users/data/datasources/user_local_data_sources.dart';
 import 'package:BCG_Store/features/users/data/repositories/user_repository_imp.dart';
 import 'package:BCG_Store/features/users/domain/usecases/change_password_usecase.dart';
+import 'package:BCG_Store/features/users/domain/usecases/deactivate_account_usecase.dart';
 import 'package:BCG_Store/features/users/domain/usecases/login_usecase.dart';
 import 'package:BCG_Store/features/users/domain/usecases/recovery_password_usecase.dart';
 import 'package:BCG_Store/features/users/domain/usecases/register_usecase.dart';
@@ -35,6 +36,7 @@ class UsecaseConfig {
   UpdateAccountDataUsecase? updateAccountDataUsecase;
   GetDataSellsUsecase? getDataSellsUsecase;
   UpdateTokenUsecase? updateTokenUsecase;
+  DeactivateAccountUsecase? deactivateAccountUsecase;
 
     UsecaseConfig(){
     userLocalDataSourcesImp = UserLocalDataSourcesImp();
@@ -44,6 +46,8 @@ class UsecaseConfig {
     changePasswordUsecase = ChangePasswordUsecase(userRepository: userRepositoryImpl!);
     recoveryPasswordUsecase = RecoveryPasswordUsecase(userRepository: userRepositoryImpl!);
     updateTokenUsecase = UpdateTokenUsecase(userRepository: userRepositoryImpl!);
+    deactivateAccountUsecase = DeactivateAccountUsecase(userRepository: userRepositoryImpl!);
+
 
     rewardLocalDataSourcesImpl = RewardLocalDataSourcesImpl();
     rewardRepositoryImpl = RewardRepositoryImp(rewardLocalDataSources: rewardLocalDataSourcesImpl!, userRepository: userRepositoryImpl!);

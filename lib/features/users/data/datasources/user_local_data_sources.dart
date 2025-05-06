@@ -15,6 +15,7 @@ abstract class UserLocalDataSources {
   Future<void> changePassword(ChangePasswordEntitie change_password_entiti, String token);
   Future<void> recoveryPassword(String email);
   Future<void> updatetoken( String token, String? token_device);
+  Future<void> deactivateaccount(String token,String password );
 
   
 }
@@ -40,9 +41,6 @@ Future<void> changePassword(ChangePasswordEntitie change_password_entitie, Strin
       },
       body: jsonEncode(registerData),
     );
-
-    print('Código de respuesta changePassword: ${response.statusCode}');
-    print('Cuerpo de respuesta changePassword: ${response.body}');
 
     dynamic body;
     if (response.body.isNotEmpty) {
@@ -244,10 +242,6 @@ Future<void> recoveryPassword(String email) async {
         }),
       );
 
-      print('update-token-device: $defaultApiServer/users/update-token-device/');
-      print('update-token-device Response status: ${response.statusCode}');
-      print('update-token-device Response body: ${response.body}');
-
       if (response.statusCode == 200) {
         print('Token de dispositivo actualizado exitosamente');
       } else {
@@ -263,6 +257,37 @@ Future<void> recoveryPassword(String email) async {
       throw ApiExceptionCustom(message: errorMessage);
     }
   }
-  
+  @override
+Future<void> deactivateaccount(String token, String password) async {
+  try {
+    final url = Uri.parse('${defaultApiServer}/users/deactivate-account/');
+    
+    final response = await http.post(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode({
+        'password': password,
+      }),
+    );
+
+    final dynamic jsonData = json.decode(utf8.decode(response.bodyBytes));
+
+    if (response.statusCode == 200) {
+      print('Cuenta desactivada exitosamente');
+    } else if (response.statusCode == 400) {
+      throw Exception(jsonData['password'] ?? 'Error al desactivar la cuenta');
+    } else if (response.statusCode == 401) {
+      throw Exception('Sesión expirada. Por favor, inicie sesión nuevamente.');
+    } else {
+      throw Exception('Error al desactivar la cuenta: ${response.statusCode}');
+    }
+  } catch (e) {
+    throw Exception('Error de conexión: $e');
+  }
+}
+
    
 }

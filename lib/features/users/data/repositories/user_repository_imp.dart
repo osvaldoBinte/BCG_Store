@@ -50,5 +50,15 @@ Future changePassword(ChangePasswordEntitie change_password_entitie) async {
   }
    return await userLocalDataSources.updatetoken(session.token.access, token_device);
   }
+  
+  @override
+  Future<void> deactivateaccount(String password) async {
+      final session = await authService.getSession();
+      
+  if (session == null) {
+    throw Exception('No hay sesión activa. El usuario debe iniciar sesión.');
+  }
+    return await userLocalDataSources.deactivateaccount(session.token.access, password);
+  }
 
 }

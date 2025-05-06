@@ -1,46 +1,45 @@
 import 'package:BCG_Store/features/clients/domain/entities/client_data_entitie.dart';
 
-class ClienteDataModel  extends ClientDataEntitie{
-
+class ClienteDataModel extends ClientDataEntitie {
   ClienteDataModel({
     required int id,
-    required String correo,
-    required String empresa,
-    required String celular,
-    required String domicilio,
-    required String numext,
+    String? correo,      // Modified to be nullable
+    String? empresa,     // Modified to be nullable
+    String? celular,     // Modified to be nullable
+    String? domicilio,   // Modified to be nullable
+    String? numext,      // Modified to be nullable
     String? numint,
-    required String colonia,
-    required String municipio,
-    required String cp,
-    required String estado,
-    required String pais,
-    required String rfc,
-    required String regimenfiscal,
-    required String cfdi,
+    String? colonia,     // Modified to be nullable
+    String? municipio,   // Modified to be nullable
+    String? cp,          // Modified to be nullable
+    String? estado,      // Modified to be nullable
+    String? pais,        // Modified to be nullable
+    String? rfc,         // Modified to be nullable
+    String? regimenfiscal, // Modified to be nullable
+    String? cfdi,        // Modified to be nullable
     String? url_qr,
   }) : super(
     id: id,
-    correo: correo,
-    empresa: empresa,
-    celular: celular,
-    domicilio: domicilio,
-    numext: numext,
+    correo: correo ?? '',      // Provide default value
+    empresa: empresa ?? '',    // Provide default value
+    celular: celular ?? '',    // Provide default value
+    domicilio: domicilio ?? '', // Provide default value
+    numext: numext ?? '',      // Provide default value
     numint: numint,
-    colonia: colonia,
-    municipio: municipio,
-    cp: cp,
-    estado: estado,
-    pais: pais,
-    rfc: rfc,
-    regimenfiscal: regimenfiscal,
-    cfdi: cfdi,
+    colonia: colonia ?? '',    // Provide default value
+    municipio: municipio ?? '', // Provide default value
+    cp: cp ?? '',              // Provide default value
+    estado: estado ?? '',      // Provide default value
+    pais: pais ?? '',          // Provide default value
+    rfc: rfc ?? '',            // Provide default value
+    regimenfiscal: regimenfiscal ?? '', // Provide default value
+    cfdi: cfdi ?? '',          // Provide default value
     url_qr: url_qr,
   );
 
-  factory ClienteDataModel.fromJson(Map<String, dynamic> json) {
+   factory ClienteDataModel.fromJson(Map<String, dynamic> json) {
     return ClienteDataModel(
-      id: json['id'],
+      id: json['id'] ?? 0,
       correo: json['correo'],
       empresa: json['empresa'],
       celular: json['celular'],

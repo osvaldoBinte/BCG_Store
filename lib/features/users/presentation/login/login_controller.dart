@@ -74,7 +74,8 @@ class LoginController extends GetxController {
   final RecoveryPasswordUsecase recoveryPasswordUsecase;
   final ChangePasswordUsecase changePasswordUsecase;
   final UpdateTokenUsecase updateTokenUsecase;
-  
+  final RxBool cameraPermissionDenied = false.obs;
+
   LoginController({
     required this.loginUsecase,
     required this.registerUsecase,

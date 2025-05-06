@@ -1,21 +1,31 @@
+import 'package:BCG_Store/common/errors/api_errors.dart';
+import 'package:BCG_Store/common/errors/convert_message.dart';
+import 'package:BCG_Store/common/services/auth_service.dart';
+import 'package:BCG_Store/common/theme/App_Theme.dart';
 import 'package:BCG_Store/features/clients/domain/entities/client_data_entitie.dart';
 import 'package:BCG_Store/features/clients/domain/usecases/client_data_usecase.dart';
 import 'package:BCG_Store/features/rewards/domain/entities/clientes_app_rewards_entitie.dart';
 import 'package:BCG_Store/features/rewards/domain/usecases/get_clientes_app_rewards.dart';
+import 'package:BCG_Store/features/users/domain/usecases/deactivate_account_usecase.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
 class UserDataController extends GetxController {
   final ClientDataUsecase clientDataUsecase;
   final GetClientesAppRewards getClientesAppRewards;
+  final DeactivateAccountUsecase deactivateAccountUsecase;
 
   UserDataController({
     required this.clientDataUsecase,
     required this.getClientesAppRewards,
+    required this.deactivateAccountUsecase,
   });
 
   final Rx<bool> isLoading = false.obs;
   final Rx<ClientDataEntitie?> clientData = Rx<ClientDataEntitie?>(null);
   final RxList<ClientDataEntitie> clientsList = <ClientDataEntitie>[].obs;
   final Rx<String> errorMessage = ''.obs;
+  final Rx<String> errorMessagedelete = ''.obs;
 
   final Rx<bool> isLoadingRewards = false.obs;
   final Rx<ClientesAppRewardsEntitie?> selectedRewardsClient = Rx<ClientesAppRewardsEntitie?>(null);
@@ -182,4 +192,55 @@ class UserDataController extends GetxController {
   String getRewardsClientUsername() {
     return selectedRewardsClient.value?.username ?? 'Sin usuario';
   }
+Future<void> deactivateAccount(String password) async {
+  try {
+    // Mostrar indicador de carga con flutter_spinkit
+    Get.dialog(
+      Center(
+        child: SpinKitFadingCircle(
+          color: AppTheme.primaryColor,
+          size: 50.0,
+        ),
+      ),
+      barrierDismissible: false,
+    );
+    
+    await deactivateAccountUsecase.execute(password);
+    
+    Get.back();
+    
+    Get.snackbar(
+      'Éxito',
+      'Tu cuenta ha sido eliminada correctamente',
+      backgroundColor: Colors.green,
+      colorText: Colors.white,
+      snackPosition: SnackPosition.BOTTOM,
+    );
+    
+    await AuthService().logout();
+    Get.offAllNamed('/login');
+ } catch (e) {
+  if (Get.isDialogOpen!) {
+    Get.back();
+  }
+
+      final cleanErrorMessage = cleanExceptionMessage(e);
+
+      
+      
+     Get.snackbar(
+    'Ups...',
+    cleanErrorMessage,
+    backgroundColor: AppTheme.errorColor,
+    colorText: Colors.white,
+    snackPosition: SnackPosition.BOTTOM,
+  );
+
+  print('❌ Error en deactivateAccount: $cleanErrorMessage');
+}
+
+}
+
+
+
 }

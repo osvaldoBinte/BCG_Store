@@ -110,7 +110,6 @@ class _QRScannerWidgetState extends State<QRScannerWidget> {
                                   formats: [BarcodeFormat.qrCode],
                                 );
                                 controller.qrScannerController = scannerController;
-                                setState(() {});
                               },
                               child: Text('Reiniciar cámara'),
                             ),

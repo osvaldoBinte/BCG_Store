@@ -38,12 +38,11 @@ Future<List<CheckPointsEntitie>> getRewards(String token, String id_cliente) asy
       print('⭐ Respuesta exitosa');
       print('⭐ Cuerpo de respuesta: ${response.body}');
       
-      // Decodificar la respuesta como un Map en lugar de una List
       final Map<String, dynamic> responseData = json.decode(response.body);
-      
+       
+
       List<CheckPointsEntitie> results = [];
       
-      // Procesar puntos ganados
       if (responseData.containsKey('puntos_ganados')) {
         print('⭐ Procesando puntos ganados');
         final List<dynamic> puntosGanadosJson = responseData['puntos_ganados'];
@@ -51,7 +50,6 @@ Future<List<CheckPointsEntitie>> getRewards(String token, String id_cliente) asy
         
         for (var item in puntosGanadosJson) {
           try {
-            // Crear un modelo a partir de los datos de Ventas_Fidelizacion
             final model = CheckPointModel(
               folio_venta: item['folio_venta'] ?? '',
               puntos_ganados: (item['monedero'] ?? 0).toDouble(),
@@ -74,7 +72,6 @@ Future<List<CheckPointsEntitie>> getRewards(String token, String id_cliente) asy
         }
       }
       
-      // Procesar puntos gastados
       if (responseData.containsKey('puntos_gastados')) {
         print('⭐ Procesando puntos gastados');
         final List<dynamic> puntosGastadosJson = responseData['puntos_gastados'];
@@ -82,14 +79,13 @@ Future<List<CheckPointsEntitie>> getRewards(String token, String id_cliente) asy
         
         for (var item in puntosGastadosJson) {
           try {
-            // Crear un modelo a partir de los datos de Ventas_ConPuntos
             final model = CheckPointModel(
               folio_venta: item['folio'] ?? '',
               puntos_ganados: 0,
-              fecha_puntos_ganados: '', // No hay fecha de puntos ganados en este caso
+              fecha_puntos_ganados: '', 
               puntos_usados: (item['puntos'] ?? 0).toDouble(),
               fecha_puntos_usados: item['fec'] ?? '',
-              saldo_puntos: -(item['puntos'] ?? 0).toDouble(), // Negativo porque son puntos usados
+              saldo_puntos: -(item['puntos'] ?? 0).toDouble(), 
               usuario: item['usuario'] ?? '',
               importe: (item['importe'] ?? 0).toDouble(),
               id_cliente: item['id_cliente'],
@@ -103,7 +99,6 @@ Future<List<CheckPointsEntitie>> getRewards(String token, String id_cliente) asy
         }
       }
       
-      // Procesamiento del resumen si existe
       if (responseData.containsKey('resumen')) {
         print('⭐ Información de resumen disponible: ${responseData['resumen']}');
         final double balanceActual = (responseData['resumen']['balance_actual'] ?? 0).toDouble();
@@ -112,7 +107,6 @@ Future<List<CheckPointsEntitie>> getRewards(String token, String id_cliente) asy
       
       print('⭐ Total de elementos procesados: ${results.length}');
       
-      // Ordenamos los resultados por fecha (más reciente primero)
       results.sort((a, b) {
         DateTime dateA = _parseDate(a.puntos_ganados > 0 ? a.fecha_puntos_ganados : (a.fecha_puntos_usados ?? ''));
         DateTime dateB = _parseDate(b.puntos_ganados > 0 ? b.fecha_puntos_ganados : (b.fecha_puntos_usados ?? ''));
@@ -294,10 +288,7 @@ final dynamic jsonData = json.decode(utf8.decode(response.bodyBytes));
   @override
 Future<List<GetDataSellsEntitie>> getDataSells(String token, String id_cliente) async {
   try {
-    print('⭐ Iniciando getDataSells');
-    print('⭐ Token: ${token.substring(0, 10)}...'); 
-    print('⭐ ID Cliente: $id_cliente');
-
+   
     final response = await http.get(
       Uri.parse('$defaultApiServer/ventas_cliente/$id_cliente/'),
       headers: {
@@ -306,17 +297,12 @@ Future<List<GetDataSellsEntitie>> getDataSells(String token, String id_cliente) 
       },
     );
     
-    print('⭐ Código de respuesta: ${response.statusCode}');
     
     if (response.statusCode == 200) {
-      print('⭐ Respuesta exitosa');
       
-      // Decodificar el JSON
       final dynamic jsonData = json.decode(utf8.decode(response.bodyBytes));      
 
-      print('⭐ Número de ventas recibidas: ${jsonData.length}');
       
-      // Utilizar el método parseList del modelo para procesar los datos
       try {
         final List<GetDataSellsEntitie> results = GetDataSellsModel.parseList(jsonData);
         print('⭐ Total de productos procesados: ${results.length}');

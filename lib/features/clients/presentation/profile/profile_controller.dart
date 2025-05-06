@@ -542,22 +542,13 @@ void showQRModal(BuildContext context) async {
                                         
                                         // Botón para forzar recarga si hay problemas
                                         if (clientData.value == null || clientData.value?.url_qr == null || clientData.value!.url_qr!.isEmpty)
-                                          Padding(
-                                            padding: const EdgeInsets.only(bottom: 16.0),
-                                            child: ElevatedButton.icon(
-                                              onPressed: () async {
-                                                setState(() {}); // Actualizar el StatefulBuilder
-                                                await fetchClientData();
-                                                setState(() {}); // Actualizar nuevamente después de la carga
-                                              },
-                                              icon: Icon(Icons.refresh, size: 16),
-                                              label: Text('Actualizar QR'),
-                                              style: ElevatedButton.styleFrom(
-                                                backgroundColor: AppTheme.primaryColor,
-                                                foregroundColor: AppTheme.secondaryColor,
-                                              ),
-                                            ),
-                                          ),
+                                          _buildActionButton(
+                                                      icon: Icons.download,
+                                                      label: 'Actualizar QR',
+                                                      isLoading: isDownloading.value,
+                                                      onPressed: () => fetchClientData(),
+                                                    ),
+                                                    
                                         
                                         // Usamos Obx para reaccionar a cambios en clientData
                                         Obx(() {
@@ -628,7 +619,6 @@ void showQRModal(BuildContext context) async {
                                                             TextButton(
                                                               onPressed: () async {
                                                                 await fetchClientData();
-                                                                setState(() {}); // Actualizar el StatefulBuilder
                                                               },
                                                               child: Text('Reintentar'),
                                                             ),
@@ -716,18 +706,7 @@ void showQRModal(BuildContext context) async {
                                                     ),
                                                   ),
                                                   SizedBox(height: 16),
-                                                  ElevatedButton.icon(
-                                                    onPressed: () async {
-                                                      await fetchClientData();
-                                                      setState(() {}); // Actualizar el StatefulBuilder
-                                                    },
-                                                    icon: Icon(Icons.refresh, size: 16),
-                                                    label: Text('Actualizar'),
-                                                    style: ElevatedButton.styleFrom(
-                                                      backgroundColor: AppTheme.primaryColor,
-                                                      foregroundColor: AppTheme.secondaryColor,
-                                                    ),
-                                                  ),
+                                                 
                                                 ],
                                               ),
                                             );

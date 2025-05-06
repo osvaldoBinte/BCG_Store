@@ -54,12 +54,10 @@
 		<true/>
 		<key>UIApplicationSupportsIndirectInputEvents</key>
 		<true/>
-		<key>NSPhotoLibraryAddUsageDescription</key>
-		<string>La aplicación necesita acceso para guardar imágenes en tu galería</string>
 		<key>NSPhotoLibraryUsageDescription</key>
-		<string>La aplicación necesita acceso para guardar imágenes en tu galería</string>
+		<string>Usamos tu galería para que puedas guardar o descargar tu código QR directamente en tu dispositivo.</string>
 		<key>NSCameraUsageDescription</key>
-		<string>La aplicación necesita acceso a la cámara para tomar fotos y videos</string>
+		<string>Necesitamos acceder a tu cámara para escanear códigos QR y permitirte iniciar sesión o crear una cuenta.</string>
 		<key>UIStatusBarHidden</key>
 		<false/>
 	</dict>

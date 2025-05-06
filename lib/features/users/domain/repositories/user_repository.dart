@@ -9,4 +9,5 @@ abstract class UserRepository {
   Future changePassword(ChangePasswordEntitie change_password_entitie);
   Future<void> recoveryPassword(String email);
   Future<void> updatetoken(String? token_device);
+  Future<void> deactivateaccount( String password);
 }

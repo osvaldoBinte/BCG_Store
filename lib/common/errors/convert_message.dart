@@ -11,3 +11,17 @@ String convertMessageException({required dynamic error}) {
       return error.toString();
   }
 }
+
+
+String cleanExceptionMessage(dynamic e) {
+  String message = e.toString();
+
+  while (message.trim().startsWith("Exception:")) {
+    message = message.trim().replaceFirst("Exception:", "").trim();
+  }
+  message = message.replaceAll("Exception:", "").trim();
+message = message.replaceAll("Exception:", "").trim();
+message = message.replaceAll("Error de conexión:", "").trim();
+
+  return message;
+}

@@ -50,7 +50,7 @@ class MyApp extends StatelessWidget {
         Get.put(HomeController());
         Get.put(LoginController(loginUsecase: usecaseConfig.loginUsecase!, registerUsecase: usecaseConfig.registerUsecase!, recoveryPasswordUsecase: usecaseConfig.recoveryPasswordUsecase!, changePasswordUsecase: usecaseConfig.changePasswordUsecase!, updateTokenUsecase: usecaseConfig.updateTokenUsecase!,));
         Get.put(SplashScreenController( getClientesAppRewards: usecaseConfig.getClientesAppRewards!,));
-        Get.put(UserDataController(clientDataUsecase: usecaseConfig.clientedataUsecase!, getClientesAppRewards: usecaseConfig.getClientesAppRewards!,));
+        Get.put(UserDataController(clientDataUsecase: usecaseConfig.clientedataUsecase!, getClientesAppRewards: usecaseConfig.getClientesAppRewards!, deactivateAccountUsecase: usecaseConfig.deactivateAccountUsecase!,));
         Get.put(CheckPointController(checkPointUsecase: usecaseConfig.checkPointUsecase!));
         Get.put(ProfileController(clientDataUsecase: usecaseConfig.clientedataUsecase!));
         Get.put(GetDataSellsController(getDataSellsUsecase: usecaseConfig.getDataSellsUsecase!));

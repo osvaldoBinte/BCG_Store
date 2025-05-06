@@ -345,14 +345,140 @@ class UserDataPage extends StatelessWidget {
                     },
                   ),
                   
-                 /* _buildMenuListItem(
-                    icon: Icons.person_remove,
-                    iconColor: AppTheme.errorColor,
-                    title: "Eliminar cuenta",
-                    subtitle: "Elimina tu cuenta de forma permanente",
-                    onTap: () {
-                    },
-                  ),*/
+           _buildMenuListItem(
+  icon: Icons.person_remove,
+  iconColor: AppTheme.errorColor,
+  title: "Eliminar cuenta",
+  subtitle: "Elimina tu cuenta de forma permanente",
+  onTap: () {
+    final controller = Get.find<UserDataController>();
+    
+    if (Get.context != null) {
+      // Primer confirmación
+      showCustomAlert(
+        context: Get.context!,
+        title: 'Eliminar cuenta',
+        message: 'Esta acción eliminará tu cuenta de forma permanente y no podrás recuperarla. ¿Estás seguro de continuar?',
+        type: CustomAlertType.error,
+        confirmText: 'Continuar',
+        cancelText: 'Cancelar',
+        onConfirm: () {
+          // Cerrar primer diálogo
+          Navigator.of(Get.context!).pop();
+          
+          // Para el segundo diálogo, usamos un TextEditingController
+          final passwordController = TextEditingController();
+          final RxBool showPassword = false.obs;
+          
+          // Segundo diálogo con customWidget para ingresar contraseña
+          showCustomAlert(
+            context: Get.context!,
+            title: 'Ingresa tu contraseña',
+            message: '',
+            type: CustomAlertType.error,
+            confirmText: '', // Vacío porque usaremos botones personalizados
+            cancelText: null, // Null para no mostrar el botón de cancelar por defecto
+            customWidget: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  'Por favor, ingresa tu contraseña para confirmar la eliminación de tu cuenta:',
+                  style: TextStyle(color: AppTheme.textPrimaryColor),
+                ),
+                SizedBox(height: 16),
+                Obx(() => TextField(
+                  controller: passwordController,
+                  obscureText: !showPassword.value,
+                  decoration: InputDecoration(
+                    labelText: 'Contraseña',
+                    border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.lock, color: AppTheme.primaryColor),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        showPassword.value ? Icons.visibility_off : Icons.visibility,
+                        color: AppTheme.primaryColor,
+                      ),
+                      onPressed: () {
+                        showPassword.value = !showPassword.value;
+                      },
+                    ),
+                  ),
+                )),
+                SizedBox(height: 20),
+                // Botones de acción en columna (uno debajo del otro)
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppTheme.errorColor,
+                        padding: EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      onPressed: () {
+                        if (passwordController.text.isEmpty) {
+                          Get.snackbar(
+                            'Error',
+                            'Por favor, ingresa tu contraseña',
+                            backgroundColor: AppTheme.errorColor,
+                            colorText: Colors.white,
+                            snackPosition: SnackPosition.BOTTOM,
+                          );
+                          return;
+                        }
+                        
+                        // Cerrar diálogo de contraseña
+                        Navigator.of(Get.context!).pop();
+                        
+                        // Llamar al método actualizado (que maneja todo internamente)
+                        controller.deactivateAccount(passwordController.text);
+                      },
+                      child: Text(
+                        'Eliminar',
+                        style: TextStyle(
+                          color: Colors.white, 
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 10),
+                    TextButton(
+                      style: TextButton.styleFrom(
+                        padding: EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          side: BorderSide(color: AppTheme.textSecondaryColor.withOpacity(0.3)),
+                        ),
+                      ),
+                      onPressed: () {
+                        Navigator.of(Get.context!).pop();
+                      },
+                      child: Text(
+                        'Cancelar',
+                        style: TextStyle(
+                          color: AppTheme.textPrimaryColor,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            onConfirm: () {}, // No se usa pero debe estar presente
+            onCancel: () {}, // No se usa pero debe estar presente
+          );
+        },
+        onCancel: () {
+          Navigator.of(Get.context!).pop();
+        },
+      );
+    }
+  },
+),
                   
                   const SizedBox(height: 32),
                 ],
