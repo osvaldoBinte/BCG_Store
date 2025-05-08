@@ -14,13 +14,15 @@ class CheckPointsEntitie {
   
   // Para puntos gastados
   final double? importe;
-  final int? id_cliente;
+  final String? id_cliente;
+  final int? ventaId;
 
   CheckPointsEntitie({
     required this.folio_venta,
     required this.puntos_ganados,
     required this.fecha_puntos_ganados,
     required this.puntos_usados,
+     this.ventaId,
     this.fecha_puntos_usados,
     required this.saldo_puntos,
     this.monedero,

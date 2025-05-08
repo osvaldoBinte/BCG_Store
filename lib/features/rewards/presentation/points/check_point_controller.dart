@@ -18,6 +18,9 @@ class CheckPointController extends GetxController {
   
   // Variable para saber si no hay puntos (distinción entre error y vacío)
   final RxBool hasNoPoints = false.obs;
+  
+  // Nueva propiedad para controlar el orden de clasificación
+  final Rx<bool> isDescendingOrder = true.obs;
 
   @override
   void onInit() {
@@ -34,6 +37,37 @@ class CheckPointController extends GetxController {
     if (!_hasAttemptedLoad.value) {
       fetchCheckPoints();
     }
+  }
+
+  // Método para ordenar la lista por ventaId
+  void sortByVentaId({bool? descending}) {
+    // Si se proporciona un valor para descending, actualiza isDescendingOrder
+    if (descending != null) {
+      isDescendingOrder.value = descending;
+    }
+    
+    // Crea una copia de la lista para ordenarla
+    final sortedList = List<CheckPointsEntitie>.from(checkPoints);
+    
+    // Ordena por ventaId
+    if (isDescendingOrder.value) {
+      // Orden descendente (del más grande al más pequeño)
+      sortedList.sort((a, b) => (b.ventaId ?? 0).compareTo(a.ventaId ?? 0));
+    } else {
+      // Orden ascendente (del más pequeño al más grande)
+      sortedList.sort((a, b) => (a.ventaId ?? 0).compareTo(b.ventaId ?? 0));
+    }
+    
+    // Asigna la lista ordenada
+    checkPoints.assignAll(sortedList);
+    
+    print('🔢 Lista ordenada por ventaId - Orden descendente: ${isDescendingOrder.value}');
+  }
+  
+  // Cambiar el orden de clasificación y re-ordenar la lista
+  void toggleSortOrder() {
+    isDescendingOrder.value = !isDescendingOrder.value;
+    sortByVentaId();
   }
 
   Future<void> fetchCheckPoints() async {
@@ -62,6 +96,9 @@ class CheckPointController extends GetxController {
         // Actualizar los datos en la UI
         print('✅ Puntos cargados: ${result.length}');
         checkPoints.assignAll(result);
+        
+        // Ordenar por ventaId (por defecto en orden descendente)
+        sortByVentaId();
         
         // Calcular puntos totales
         _calculateTotalPoints();
@@ -119,6 +156,10 @@ class CheckPointController extends GetxController {
       } else {
         print('✅ Puntos actualizados: ${result.length}');
         checkPoints.assignAll(result);
+        
+        // Ordenar por ventaId después de refrescar
+        sortByVentaId();
+        
         _calculateTotalPoints();
         hasNoPoints.value = false;
       }

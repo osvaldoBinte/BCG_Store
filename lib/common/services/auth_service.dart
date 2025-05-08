@@ -39,7 +39,8 @@ class AuthService {
   Future<bool> saveLoginResponse(LoginResponse response) async {
     try {
       _cachedSession = response;
-      
+            print('Guardando sitio web: ${response.sitioWeb}');
+
       final sessionData = {
         'message': response.message,
         'user': {
@@ -53,7 +54,9 @@ class AuthService {
           'refresh': response.token.refresh,
           'access': response.token.access
         },
-        'tienda_activa': response.tienda_activa
+        'tienda_activa': response.tienda_activa,
+        'sitio_web': response.sitioWeb ,
+
       };
       
       _prefsUser.savePrefs(

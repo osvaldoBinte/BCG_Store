@@ -17,6 +17,7 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> {
   final RxBool _isTiendaActiva = true.obs;
         final authService = AuthService();
+    final ProfileController controller = Get.find<ProfileController>();
 
 final RxInt _currentPage = 0.obs;
   @override
@@ -70,8 +71,13 @@ final RxInt _currentPage = 0.obs;
     );
   }
 
-  Widget _buildPointsCard(BuildContext context) {
-    return Container(
+Widget _buildPointsCard(BuildContext context) {
+  return GestureDetector(
+    onTap: () async {
+      controller.openWebsiteFromSession();
+    },
+    child: Container(
+      // Resto del widget permanece igual
       width: MediaQuery.of(context).size.width * 0.8,
       margin: const EdgeInsets.only(right: 16),
       padding: const EdgeInsets.all(20),
@@ -80,6 +86,7 @@ final RxInt _currentPage = 0.obs;
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
             padding: const EdgeInsets.all(8),
@@ -114,14 +121,25 @@ final RxInt _currentPage = 0.obs;
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
+                const SizedBox(height: 8),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Image.asset(
+                    'assets/imgcart.jpeg',
+                    height: 80,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                  ),
+                ),
               ],
             ),
           ),
-          
         ],
       ),
-    );
-  }
+    ),
+  );
+}
+
 
   Widget _buildAddPaymentMethodCard(BuildContext context) {
     return InkWell(
@@ -355,7 +373,6 @@ final RxInt _currentPage = 0.obs;
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
     final padding = MediaQuery.of(context).padding;
-    final ProfileController controller = Get.find<ProfileController>();
     
     final bottomNavHeight = 70.0 + 16.0 * 2;
     return Scaffold(

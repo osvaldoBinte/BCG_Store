@@ -60,5 +60,10 @@
 		<string>Necesitamos acceder a tu cámara para escanear códigos QR y permitirte iniciar sesión o crear una cuenta.</string>
 		<key>UIStatusBarHidden</key>
 		<false/>
+		<key>LSApplicationQueriesSchemes</key>
+		<array>
+		<string>http</string>
+		<string>https</string>
+		</array>
 	</dict>
 </plist>

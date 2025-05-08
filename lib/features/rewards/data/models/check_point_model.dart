@@ -13,7 +13,8 @@ class CheckPointModel extends CheckPointsEntitie {
     double? porcentaje,
     String? usuario,
     double? importe,
-    int? id_cliente,
+    String? id_cliente,
+     int? ventaId,
   }) : super(
           folio_venta: folio_venta,
           puntos_ganados: puntos_ganados,
@@ -26,7 +27,7 @@ class CheckPointModel extends CheckPointsEntitie {
           porcentaje: porcentaje,
           usuario: usuario,
           importe: importe,
-          id_cliente: id_cliente,
+          id_cliente: id_cliente,ventaId:ventaId
         );
 
   factory CheckPointModel.fromJson(Map<String, dynamic> json) {
@@ -48,6 +49,7 @@ class CheckPointModel extends CheckPointsEntitie {
         porcentaje: (json['porcentaje'] ?? 0).toDouble(),
         usuario: json['usuario'] ?? '',
         id_cliente: json['id_cliente'],
+        ventaId: json['VentaId'] ?? '',
       );
     } else if (isPuntosGastados) {
       // Mapear desde la respuesta de Ventas_ConPuntos
@@ -61,6 +63,7 @@ class CheckPointModel extends CheckPointsEntitie {
         usuario: json['usuario'] ?? '',
         importe: (json['importe'] ?? 0).toDouble(),
         id_cliente: json['id_cliente'],
+        ventaId: json['VentaId'] ?? '',
       );
     } else {
       // Si ya viene en el formato unificado que espera la app
@@ -77,6 +80,7 @@ class CheckPointModel extends CheckPointsEntitie {
         usuario: json['usuario'],
         importe: json['importe']?.toDouble(),
         id_cliente: json['id_cliente'],
+        ventaId: json['VentaId'] ?? '',
       );
     }
   }
@@ -95,6 +99,7 @@ class CheckPointModel extends CheckPointsEntitie {
       usuario: checkPointsEntitie.usuario,
       importe: checkPointsEntitie.importe,
       id_cliente: checkPointsEntitie.id_cliente,
+      ventaId: checkPointsEntitie.ventaId,
     );
   }
 
@@ -112,6 +117,7 @@ class CheckPointModel extends CheckPointsEntitie {
       'usuario': usuario,
       'importe': importe,
       'id_cliente': id_cliente,
+      'VentaId': ventaId,
     };
   }
 }

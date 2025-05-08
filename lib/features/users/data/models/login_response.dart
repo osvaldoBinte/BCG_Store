@@ -3,20 +3,27 @@ class LoginResponse {
   final UserData user;
   final TokenData token;
   final String tienda_activa;
+  final String? sitioWeb; 
+
 
   LoginResponse({
     required this.message, 
     required this.user, 
     required this.token,
-    required this.tienda_activa
+    required this.tienda_activa,
+    this.sitioWeb,
+
   });
 
-  factory LoginResponse.fromJson(Map<String, dynamic> json) {
+   factory LoginResponse.fromJson(Map<String, dynamic> json) {
     return LoginResponse(
       message: json['message'] ?? '',
       user: UserData.fromJson(json['user']),
       token: TokenData.fromJson(json['token']),
       tienda_activa: json['tienda_activa'] ?? '',
+      sitioWeb: json['sitio_web'] == null || json['sitio_web'] == ''
+          ? null
+          : json['sitio_web'],
     );
   }
 }class UserData {

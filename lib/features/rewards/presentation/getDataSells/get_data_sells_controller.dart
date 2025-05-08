@@ -21,26 +21,62 @@ class GetDataSellsController extends GetxController {
   final RxMap<String, bool> loadingStatusByFolio = <String, bool>{}.obs;
   final RxMap<String, bool> hasPointsByFolio = <String, bool>{}.obs;
   
-  // Referencia al controlador de puntos
-  CheckPointController? _pointsController;
-
+  // Nueva propiedad para controlar el orden de clasificación
+  final Rx<bool> isDescendingOrder = true.obs;
+  
   @override
   void onInit() {
     super.onInit();
     fetchDataSells();
-    _initPointsController();
-  }
-  
-  // Inicializar el controlador de puntos si está disponible
-  void _initPointsController() {
-    try {
-      _pointsController = Get.find<CheckPointController>();
-      print('✅ CheckPointController encontrado');
-    } catch (e) {
-      print('⚠️ No se pudo encontrar el CheckPointController: $e');
-    }
   }
 
+  // Obtener el tipo de puntos para un folio específico
+  String getTipoPuntos(String folio) {
+    final venta = buscarVentaPorFolio(folio);
+    if (venta == null) return '';
+    
+    return (venta.tipoPuntos ?? '').toUpperCase();
+  }
+
+  // Obtener los puntos por tipo (GANADOS/GASTADOS) para un folio específico
+  Map<String, double> getPuntosPorTipo(String folio) {
+    final venta = buscarVentaPorFolio(folio);
+    if (venta == null) return {'GANADOS': 0.0, 'GASTADOS': 0.0};
+    
+    final tipo = (venta.tipoPuntos ?? '').toUpperCase();
+    final puntos = venta.puntos ?? 0.0;
+    
+    if (tipo.contains('GANADOS')) {
+      return {'GANADOS': puntos, 'GASTADOS': 0.0};
+    } else if (tipo.contains('GASTADOS')) {
+      return {'GANADOS': 0.0, 'GASTADOS': puntos};
+    }
+    
+    return {'GANADOS': 0.0, 'GASTADOS': 0.0};
+  }
+
+  void sortByVentaId({bool? descending}) {
+    if (descending != null) {
+      isDescendingOrder.value = descending;
+    }
+    
+    final sortedList = List<GetDataSellsEntitie>.from(sellsList);
+    
+    if (isDescendingOrder.value) {
+      sortedList.sort((a, b) => (b.ventaId ?? 0).compareTo(a.ventaId ?? 0));
+    } else {
+      sortedList.sort((a, b) => (a.ventaId ?? 0).compareTo(b.ventaId ?? 0));
+    }
+    
+    sellsList.assignAll(sortedList);
+  }
+  
+  void toggleSortOrder() {
+    isDescendingOrder.value = !isDescendingOrder.value;
+    sortByVentaId();
+  }
+
+  // Cargar los datos de ventas desde el repositorio
   Future<void> fetchDataSells() async {
     try {
       isLoading.value = true;
@@ -53,8 +89,12 @@ class GetDataSellsController extends GetxController {
         sellsList.assignAll(result);
         print('✅ Datos de ventas cargados correctamente: ${result.length}');
         
-        // Verificar puntos para todas las ventas cargadas
-        _checkPointsForAllPurchases();
+        // Ordena la lista por ventaId (por defecto en orden descendente)
+        sortByVentaId();
+        
+        // Inicializa la información de puntos para cada folio
+        _initializePointsData();
+        
       } else {
         sellsList.clear();
         emptyResponse.value = true;
@@ -76,50 +116,22 @@ class GetDataSellsController extends GetxController {
     }
   }
   
-  // Verificar puntos para todas las compras
-  void _checkPointsForAllPurchases() {
-    if (_pointsController == null) return;
-    
-    // Obtener folios únicos de compras
-    final folios = <String>{};
-    for (var item in sellsList) {
-      if (item.folio != null) {
-        folios.add(item.folio!);
-      }
-    }
-    
-    // Verificar puntos para cada folio
-    for (var folio in folios) {
-      checkPointsForPurchase(folio);
-    }
-  }
-  
-  // Verificar puntos para una compra específica
-  Future<void> checkPointsForPurchase(String folio) async {
-    if (_pointsController == null) return;
-    
-    // Marcar como cargando
-    loadingStatusByFolio[folio] = true;
-    hasPointsByFolio[folio] = false;
-    
-    try {
-      // Buscar en la lista de puntos
-      final points = _pointsController!.checkPoints;
-      for (var point in points) {
-        if (point.folio_venta == folio) {
-          pointsByFolio[folio] = point.puntos_ganados;
-          hasPointsByFolio[folio] = true;
-          print('✅ Puntos encontrados para folio $folio: ${point.puntos_ganados}');
-          break;
-        }
-      }
-    } catch (e) {
-      print('❌ Error al buscar puntos para folio $folio: $e');
-    } finally {
+  // Método para inicializar los datos de puntos
+  void _initializePointsData() {
+    // Ahora sellsList ya contiene objetos agrupados por folio
+    for (final venta in sellsList) {
+      final folio = venta.folio;
+      if (folio == null || folio.isEmpty) continue;
+      
+      final tienePuntos = (venta.puntos ?? 0) > 0;
+      
+      // Almacenamos el estado en los mapas reactivos
+      hasPointsByFolio[folio] = tienePuntos;
       loadingStatusByFolio[folio] = false;
+      pointsByFolio[folio] = venta.puntos ?? 0.0;
     }
   }
-  
+
   // Verificar si una compra está cargando información de puntos
   bool isPurchaseLoadingPoints(String folio) {
     return loadingStatusByFolio[folio] ?? false;
@@ -127,6 +139,11 @@ class GetDataSellsController extends GetxController {
   
   // Verificar si una compra tiene puntos
   bool purchaseHasPoints(String folio) {
+    if (!hasPointsByFolio.containsKey(folio)) {
+      final venta = buscarVentaPorFolio(folio);
+      final tienePuntos = (venta?.puntos ?? 0) > 0;
+      hasPointsByFolio[folio] = tienePuntos;
+    }
     return hasPointsByFolio[folio] ?? false;
   }
   
@@ -162,5 +179,16 @@ class GetDataSellsController extends GetxController {
     } catch (e) {
       return null;
     }
+  }
+  
+  // Obtener todas las salidas (productos) para un folio específico
+  List<SalidaEntitie> obtenerSalidasPorFolio(String folio) {
+    final venta = buscarVentaPorFolio(folio);
+    return venta?.salidas ?? [];
+  }
+  
+  // Contar el número total de productos en todas las ventas
+  int contarTotalProductos() {
+    return sellsList.fold(0, (sum, venta) => sum + (venta.salidas?.length ?? 0));
   }
 }

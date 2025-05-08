@@ -1,3 +1,4 @@
+import 'package:BCG_Store/common/services/auth_service.dart';
 import 'package:BCG_Store/common/theme/App_Theme.dart';
 import 'package:BCG_Store/features/clients/domain/entities/client_data_entitie.dart';
 import 'package:BCG_Store/features/clients/domain/usecases/client_data_usecase.dart';
@@ -6,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter/services.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'qr_loading_widget.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
@@ -770,4 +772,69 @@ void showQRModal(BuildContext context) async {
       label: Text(label),
     );
   }
+  Future<void> openWebsiteFromSession() async {
+  try {
+    final auth = AuthService();
+    final session = await auth.getSession();
+    
+    print('Sitio web desde sesión: ${session?.sitioWeb}');
+    
+    if (session?.sitioWeb != null && session!.sitioWeb!.isNotEmpty) {
+      final url = session.sitioWeb!;
+      
+      // Imprimir la URL para depuración
+      print('Intentando abrir URL: $url');
+      
+      // Crea una Uri sin modificaciones
+      final uri = Uri.parse(url);
+      
+      // Intenta con el modo universal primero
+      bool launched = await launchUrl(
+        uri,
+        mode: LaunchMode.platformDefault,
+      );
+      
+      if (!launched) {
+        print('Intento 1 fallido, probando con externalApplication');
+        launched = await launchUrl(
+          uri,
+          mode: LaunchMode.externalApplication,
+        );
+        
+        if (!launched) {
+          print('Intento 2 fallido, probando con inAppWebView');
+          launched = await launchUrl(
+            uri,
+            mode: LaunchMode.inAppWebView,
+            webViewConfiguration: const WebViewConfiguration(
+              enableJavaScript: true,
+              enableDomStorage: true,
+            ),
+          );
+          
+          if (!launched) {
+            print('Todos los intentos fallaron');
+            throw 'No se pudo abrir la URL: $url';
+          }
+        }
+      }
+    } else {
+      print('ℹ️ No hay sitio web disponible');
+      ScaffoldMessenger.of(Get.context!).showSnackBar(
+        SnackBar(
+          content: Text('No hay sitio web disponible'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
+  } catch (e) {
+    print('❌ Error al abrir URL: $e');
+    ScaffoldMessenger.of(Get.context!).showSnackBar(
+      SnackBar(
+        content: Text('No se pudo abrir el sitio web. ${e.toString()}'),
+        duration: Duration(seconds: 3),
+      ),
+    );
+  }
+}
 }

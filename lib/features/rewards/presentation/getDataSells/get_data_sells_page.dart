@@ -395,39 +395,30 @@ class _GetDataSellsPageState extends State<GetDataSellsPage> with TickerProvider
       ),
     );
   }
-
-  Widget _buildPurchasesListFromAPI(BuildContext context) {
-    if (purchasesByFolio.isEmpty) {
-      if (!isTiendaActiva.value || selectedTab.value == 1 || tabController!.length == 1) {
-        return _buildEmptyStateTienda(context);
-      } else {
-        return _buildEmptyStateOnline(context);
-      }
+Widget _buildPurchasesListFromAPI(BuildContext context) {
+  if (controller.sellsList.isEmpty) {
+    if (!isTiendaActiva.value || selectedTab.value == 1 || tabController!.length == 1) {
+      return _buildEmptyStateTienda(context);
+    } else {
+      return _buildEmptyStateOnline(context);
     }
-
-    final folios = purchasesByFolio.keys.toList();
-    folios.sort((a, b) => b.compareTo(a));
-
-    return RefreshIndicator(
-      onRefresh: () async => forceReload(),
-      color: AppTheme.primaryColor,
-      child: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: folios.length,
-        itemBuilder: (context, index) {
-          final folio = folios[index];
-          final items = purchasesByFolio[folio] ?? [];
-          return ExpandablePurchaseCard(
-            folio: folio,
-            items: items,
-            fecha: getPurchaseDate(folio),
-            total: getPurchaseTotal(folio),
-            subtotal: getPurchaseSubtotal(folio),
-            iva: getPurchaseIVA(folio),
-            formaPago: getPurchasePaymentMethod(folio),
-          );
-        },
-      ),
-    );
   }
+
+  final purchases = controller.sellsList.toList();
+
+  return RefreshIndicator(
+    onRefresh: () async => forceReload(),
+    color: AppTheme.primaryColor,
+    child: ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: purchases.length,
+      itemBuilder: (context, index) {
+        final venta = purchases[index];
+        return ExpandablePurchaseCard(
+          venta: venta,
+        );
+      },
+    ),
+  );
+}
 }
