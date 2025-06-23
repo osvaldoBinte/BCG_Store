@@ -108,7 +108,7 @@ class AppTheme {
       ),
     ),
 
-    tabBarTheme: TabBarTheme(
+    tabBarTheme: TabBarThemeData(
       labelColor: secondaryColor,
       unselectedLabelColor: textSecondaryColor,
       indicatorColor: primaryColor,
@@ -133,7 +133,7 @@ class AppTheme {
       ),
     ),
 
-    cardTheme: CardTheme(
+    cardTheme: CardThemeData(
       color: Colors.white,
       elevation: 0,
       shape: RoundedRectangleBorder(

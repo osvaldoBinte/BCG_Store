@@ -228,7 +228,7 @@ class ThemeService extends GetxService {
         ),
       ),
 
-      tabBarTheme: TabBarTheme(
+      tabBarTheme: TabBarThemeData(
         labelColor: Colors.white,
         unselectedLabelColor: Colors.black54,
         indicatorColor: primaryColor.value,
@@ -253,7 +253,7 @@ class ThemeService extends GetxService {
         ),
       ),
 
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: Colors.white,
         elevation: 0,
         shape: RoundedRectangleBorder(

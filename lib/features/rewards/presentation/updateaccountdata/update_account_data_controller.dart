@@ -1,6 +1,6 @@
 import 'package:BCG_Store/features/rewards/domain/entities/clientes_app_rewards_entitie.dart';
 import 'package:BCG_Store/features/rewards/domain/usecases/update_account_data_usecase.dart';
-import 'package:BCG_Store/page/widgets/custom_alert_type.dart';
+import 'package:BCG_Store/common/widgets/custom_alert_type.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 class UpdateAccountDataController extends GetxController {

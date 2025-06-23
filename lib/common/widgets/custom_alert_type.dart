@@ -2,7 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 import 'package:BCG_Store/common/theme/App_Theme.dart';
-import 'package:BCG_Store/page/widgets/animated_success_check.dart';
+import 'package:BCG_Store/common/widgets/animated_success_check.dart';
 
 enum CustomAlertType { info, confirm, warning, success, error }
 

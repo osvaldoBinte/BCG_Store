@@ -9,7 +9,7 @@ import 'package:BCG_Store/common/services/notification_service.dart';
 import 'package:BCG_Store/framework/preferences_service.dart';
 import 'package:get/get.dart';
 
-String enviromentSelect = Enviroment.testing.value;
+String enviromentSelect = Enviroment.development.value;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

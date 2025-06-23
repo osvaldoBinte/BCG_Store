@@ -5,6 +5,7 @@ class RegisterEntitie {
   final String first_name;
   final String last_name;
   final String? token_device;
+  final String? base_datos;
 
   RegisterEntitie({
     required this.first_name, 
@@ -13,5 +14,6 @@ class RegisterEntitie {
     required this.email,
     required this.password,
     required this.token_device,
+    required this.base_datos,
   });
 }

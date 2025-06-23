@@ -9,6 +9,7 @@ class RegisterModel extends RegisterEntitie {
   required String first_name,
   required String last_name,
   required String? token_device,
+  required String? base_datos,
   }) : super(
           id_cliente: id_cliente,
           email: email,
@@ -16,7 +17,9 @@ class RegisterModel extends RegisterEntitie {
           first_name: first_name,
           last_name: last_name,
           token_device: token_device,
+          base_datos: base_datos,
         );
+ 
 
 
   factory RegisterModel.fromJson(Map<String, dynamic> json) {
@@ -27,6 +30,7 @@ class RegisterModel extends RegisterEntitie {
       first_name: json['first_name']??'',
       last_name: json['last_name']??'',
       token_device: json['token_device']??'',
+      base_datos: json['base_datos']??'',
      
     );
   }
@@ -38,6 +42,7 @@ class RegisterModel extends RegisterEntitie {
       first_name: registerEntitie.first_name,
       last_name: registerEntitie.last_name,
       token_device: registerEntitie.token_device,
+      base_datos: registerEntitie.base_datos,
     );
   }
   Map<String, dynamic> toJson() {
@@ -48,6 +53,7 @@ class RegisterModel extends RegisterEntitie {
       'first_name': first_name,
       'last_name': last_name,
      'token_device': token_device,
+      'base_datos': base_datos,
     };
   }
 

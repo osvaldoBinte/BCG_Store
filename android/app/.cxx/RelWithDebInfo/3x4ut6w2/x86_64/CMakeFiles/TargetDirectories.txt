@@ -1,0 +1,2 @@
+/Volumes/MacExterno/MacExterno/binte/BCG _Store/android/app/.cxx/RelWithDebInfo/3x4ut6w2/x86_64/CMakeFiles/edit_cache.dir
+/Volumes/MacExterno/MacExterno/binte/BCG _Store/android/app/.cxx/RelWithDebInfo/3x4ut6w2/x86_64/CMakeFiles/rebuild_cache.dir

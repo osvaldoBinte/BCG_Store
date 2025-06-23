@@ -4,7 +4,7 @@ import 'package:BCG_Store/common/theme/App_Theme.dart';
 import 'package:BCG_Store/common/widgets/privacy_notices.dart';
 import 'package:BCG_Store/features/clients/presentation/userdata/user_data_Loading.dart';
 import 'package:BCG_Store/features/clients/presentation/userdata/user_data_controller.dart';
-import 'package:BCG_Store/page/widgets/custom_alert_type.dart';
+import 'package:BCG_Store/common/widgets/custom_alert_type.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

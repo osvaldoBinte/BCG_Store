@@ -25,11 +25,8 @@ class LoginScreen extends StatelessWidget {
       body: SafeArea(
         child: Column(
           children: [
-            // Contenedor superior con animación
-           // En tu LoginScreen
 GetX<LoginController>(
   builder: (_) {
-    // Calcular la altura del contenedor basado en el estado actual
     final containerHeight = (controller.isLoginForm.value || 
               controller.isRegisterForm.value || 
               controller.isQrScannerVisible.value ||
@@ -59,9 +56,7 @@ GetX<LoginController>(
                 ? ThemeService.to.logoUrl.value
                 : AppTheme.defaultLogoAsset;
                 
-            // Calcular el tamaño del logo como un porcentaje de la altura del contenedor
-            final logoHeight = containerHeight * 0.6; // 60% de la altura del contenedor
-                
+            final logoHeight = containerHeight * 0.6; 
             return Padding(
               padding: const EdgeInsets.only(bottom: 16.0),
               child: Center(
@@ -129,7 +124,6 @@ GetX<LoginController>(
         ),
         const SizedBox(height: 32),
         
-        // Campo de entrada para correo electrónico (que será enviado como username)
         TextField(
           controller: controller.emailController,
           decoration: InputDecoration(
@@ -206,7 +200,6 @@ GetX<LoginController>(
         
         const SizedBox(height: 16),
         
-        // Botón para recuperar contraseña
         TextButton(
           onPressed: controller.toggleRecoveryForm,
           child: Text(
@@ -219,7 +212,6 @@ GetX<LoginController>(
         
         TextButton(
           onPressed: () {
-            // Volver a la pantalla inicial
             controller.isLoginForm.value = false;
           },
           child: Text(
@@ -256,7 +248,6 @@ GetX<LoginController>(
         
         const SizedBox(height: 32),
         
-        // Campo de correo electrónico para recuperación
         TextField(
           controller: controller.recoveryEmailController,
           focusNode: controller.recoveryEmailFocusNode,
@@ -272,7 +263,6 @@ GetX<LoginController>(
         
         const SizedBox(height: 32),
         
-        // Botón para enviar solicitud de recuperación
         Obx(() => 
           ElevatedButton(
             onPressed: controller.isLoading.value ? null : controller.recoverPassword,

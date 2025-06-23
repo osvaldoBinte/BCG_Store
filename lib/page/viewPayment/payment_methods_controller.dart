@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:BCG_Store/page/widgets/custom_alert_type.dart';
+import 'package:BCG_Store/common/widgets/custom_alert_type.dart';
 import 'package:get/get.dart';
 import 'package:BCG_Store/common/theme/App_Theme.dart';
 

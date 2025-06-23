@@ -3,7 +3,7 @@ import 'package:BCG_Store/common/routes/navigation_service.dart';
 import 'package:BCG_Store/common/services/auth_service.dart';
 import 'package:BCG_Store/features/users/domain/usecases/update_token_usecase.dart';
 import 'package:BCG_Store/framework/preferences_service.dart';
-import 'package:BCG_Store/page/widgets/custom_alert_type.dart';
+import 'package:BCG_Store/common/widgets/custom_alert_type.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
@@ -640,61 +640,78 @@ class LoginController extends GetxController {
   }
 
   Future<void> register() async {
-    if (firstNameController?.text.isNotEmpty == true && 
-        lastNameController?.text.isNotEmpty == true &&
-        emailRegisterController?.text.isNotEmpty == true && 
-        registerPasswordController?.text.isNotEmpty == true) {
-      
-      if (qrClientData.value.isEmpty || !qrClientData.value.containsKey('id_cliente')) {
-        _showErrorAlert('Información incompleta', 'Por favor escanea un código QR válido primero.');
-        return;
-      }
-      
-      try {
-        isLoading.value = true;
-    String? token = await messaging.getToken();
-debugPrint('Token de Firebase: $token');
-        final registerEntity = RegisterEntitie(
-          first_name: firstNameController!.text,
-          last_name: lastNameController!.text,
-          id_cliente: int.parse(qrClientData.value['id_cliente'].toString()),
-          email: emailRegisterController!.text,
-          password: registerPasswordController!.text,
-          token_device: token,
-        );
-        
-        await registerUsecase.register(registerEntity);
-        
-        _showSuccessAlert(
-          '¡Registro exitoso!',
-          'Tu cuenta ha sido creada correctamente. Ahora puedes iniciar sesión.'
-        );
-        
-        if (qrClientData.value.containsKey('base_datos')) {
-          _saveData(AppConstants.baseDatosKey, qrClientData.value['base_datos']);
-        }
-        
-        firstNameController?.clear();
-        lastNameController?.clear();
-        emailRegisterController?.clear();
-        registerPasswordController?.clear();
-        
-        Future.delayed(Duration(milliseconds: 1500), () {
-          isRegisterForm.value = false;
-          isLoginForm.value = false;
-          qrClientData.value = qrClientData.value; 
-        });
-        
-      } catch (e) {
-        print('Error en registro: $e');
-        _showErrorAlert('Algo salió mal', 'El usuario ya existe o el código QR ya ha sido utilizado');
-      } finally {
-        isLoading.value = false;
-      }
-    } else {
-      _showWarningAlert('Campos incompletos', 'Por favor completa todos los campos para registrarte.');
+  if (firstNameController?.text.isNotEmpty == true && 
+      lastNameController?.text.isNotEmpty == true &&
+      emailRegisterController?.text.isNotEmpty == true && 
+      registerPasswordController?.text.isNotEmpty == true) {
+    
+    if (qrClientData.value.isEmpty || !qrClientData.value.containsKey('id_cliente')) {
+      _showErrorAlert('Información incompleta', 'Por favor escanea un código QR válido primero.');
+      return;
     }
+    
+    // Verificar si existe base_datos en qrClientData
+    if (!qrClientData.value.containsKey('base_datos')) {
+      _showErrorAlert('Información incompleta', 'El código QR no contiene información de la base de datos.');
+      return;
+    }
+    
+    try {
+      isLoading.value = true;
+      String? token = await messaging.getToken();
+      debugPrint('Token de Firebase: $token');
+      
+      // Incluir base_datos en el objeto RegisterEntitie
+      final registerEntity = RegisterEntitie(
+        first_name: firstNameController!.text,
+        last_name: lastNameController!.text,
+        id_cliente: int.parse(qrClientData.value['id_cliente'].toString()),
+        email: emailRegisterController!.text,
+        password: registerPasswordController!.text,
+        token_device: token,
+        base_datos: qrClientData.value['base_datos'], // Añadir base_datos
+      );
+      // Imprimir los datos para depuración
+print('--- Datos de RegisterEntitie ---');
+print('First Name: ${registerEntity.first_name}');
+print('Last Name: ${registerEntity.last_name}');
+print('ID Cliente: ${registerEntity.id_cliente}');
+print('Email: ${registerEntity.email}');
+print('Password: ${registerEntity.password}');
+print('Token Device: ${registerEntity.token_device}');
+print('Base de Datos: ${registerEntity.base_datos}');
+      await registerUsecase.register(registerEntity);
+      
+      _showSuccessAlert(
+        '¡Registro exitoso!',
+        'Tu cuenta ha sido creada correctamente. Ahora puedes iniciar sesión.'
+      );
+      
+      if (qrClientData.value.containsKey('base_datos')) {
+        _saveData(AppConstants.baseDatosKey, qrClientData.value['base_datos']);
+      }
+      
+      firstNameController?.clear();
+      lastNameController?.clear();
+      emailRegisterController?.clear();
+      registerPasswordController?.clear();
+      
+      Future.delayed(Duration(milliseconds: 1500), () {
+        isRegisterForm.value = false;
+        isLoginForm.value = false;
+        qrClientData.value = qrClientData.value; 
+      });
+      
+    } catch (e) {
+      print('Error en registro: $e');
+      _showErrorAlert('Algo salió mal', e.toString());
+    } finally {
+      isLoading.value = false;
+    }
+  } else {
+    _showWarningAlert('Campos incompletos', 'Por favor completa todos los campos para registrarte.');
   }
+}
   
   @override
   void onClose() {
